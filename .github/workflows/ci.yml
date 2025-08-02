@@ -1,0 +1,28 @@
+name: Maven CI
+
+on:
+  push:
+    branches: [ "main" ]      # roda para pushes na main
+  pull_request:
+    branches: [ "main" ]      # e para PRs contra a main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest    # VM Linux que o GitHub fornece
+
+    steps:
+      # 1) Clona seu repositório dentro da VM
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2) Instala o JDK 17 Temurin (adiciona ao PATH)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'      # cache ~/.m2 para builds mais rápidos
+
+      # 3) Executa o build + testes
+      - name: Build with Maven
+        run: ./mvnw --batch-mode verify
