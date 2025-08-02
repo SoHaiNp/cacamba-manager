@@ -27,4 +27,37 @@ public class Cacamba {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 12)
     private StatusCacamba status = StatusCacamba.DISPONIVEL;
+
+    // Getters e Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
+    public Integer getCapacidadeM3() {
+        return capacidadeM3;
+    }
+
+    public void setCapacidadeM3(Integer capacidadeM3) {
+        this.capacidadeM3 = capacidadeM3;
+    }
+
+    public StatusCacamba getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusCacamba status) {
+        this.status = status;
+    }
 }

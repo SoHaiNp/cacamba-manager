@@ -11,4 +11,7 @@ import com.eccolimp.cacamba_manager.domain.model.Aluguel;
 public interface AluguelRepository extends JpaRepository<Aluguel, Long> {
     @Query("SELECT a FROM Aluguel a WHERE a.dataFim >= :today")
     List<Aluguel> findByDataFimAfter(LocalDate today);
+    
+    @Query("SELECT a FROM Aluguel a WHERE a.dataFim >= :today")
+    List<Aluguel> ativos(LocalDate today);
 }
