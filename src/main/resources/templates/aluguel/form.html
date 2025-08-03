@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/main}">
+<body>
+  <section layout:fragment="content" th:with="title='Novo Aluguel'">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Novo Aluguel</h1>
+      <a th:href="@{/ui/alugueis}" class="btn btn-secondary">Voltar</a>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <form th:action="@{/ui/alugueis}" method="post" class="row g-3 needs-validation" novalidate>
+          <div class="col-md-6">
+            <label class="form-label">Cliente</label>
+            <select class="form-select" name="clienteId" required>
+              <option value="">Selecione um cliente</option>
+              <option th:each="c : ${clientes}" 
+                      th:value="${c.id}" 
+                      th:text="${c.nome + ' - ' + c.contato}">João Silva - (11) 99999-9999</option>
+            </select>
+            <div class="invalid-feedback">Selecione um cliente</div>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Caçamba</label>
+            <select class="form-select" name="cacambaId" required>
+              <option value="">Selecione uma caçamba</option>
+              <option th:each="c : ${cacambas}" 
+                      th:value="${c.id}" 
+                      th:text="${c.codigo + ' (' + c.capacidadeM3 + 'm³)'}">CX-001 (5m³)</option>
+            </select>
+            <div class="invalid-feedback">Selecione uma caçamba</div>
+          </div>
+          
+          <div class="col-12">
+            <label class="form-label">Endereço</label>
+            <input type="text" class="form-control" name="endereco" 
+                   placeholder="Rua, número, bairro, cidade" required>
+            <div class="invalid-feedback">Informe o endereço</div>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Dias de Aluguel</label>
+            <input type="number" class="form-control" name="dias" 
+                   min="1" max="365" value="7" required>
+            <div class="invalid-feedback">Informe o número de dias</div>
+          </div>
+          
+          <div class="col-12">
+            <button class="btn btn-success" type="submit">Registrar Aluguel</button>
+            <a class="btn btn-secondary" th:href="@{/ui/alugueis}">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script th:inline="javascript">
+    // Validação do Bootstrap
+    (function() {
+      'use strict';
+      window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+          form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+      }, false);
+    })();
+  </script>
+</body>
+</html> 

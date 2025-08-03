@@ -9,7 +9,7 @@
     
     <!-- Cards de estatísticas -->
     <div class="row mb-4">
-      <div class="col-md-4">
+      <div class="col-md-2">
         <div class="card text-center">
           <div class="card-body">
             <h5 class="card-title">Total de Caçambas</h5>
@@ -17,7 +17,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
         <div class="card text-center">
           <div class="card-body">
             <h5 class="card-title">Disponíveis</h5>
@@ -25,7 +25,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
         <div class="card text-center">
           <div class="card-body">
             <h5 class="card-title">Alugadas</h5>
@@ -33,11 +33,35 @@
           </div>
         </div>
       </div>
+      <div class="col-md-2">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Total de Clientes</h5>
+            <h2 class="text-info" th:text="${totalClientes}">0</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Aluguéis Ativos</h5>
+            <h2 class="text-primary" th:text="${alugueisAtivos}">0</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card text-center" th:classappend="${alugueisVencendo > 0} ? 'border-danger'">
+          <div class="card-body">
+            <h5 class="card-title">Vencendo em 3 dias</h5>
+            <h2 class="text-danger" th:text="${alugueisVencendo}">0</h2>
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- Links rápidos -->
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-4">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Gerenciar Caçambas</h5>
@@ -46,12 +70,21 @@
           </div>
         </div>
       </div>
-      <div class="col-md-6">
+      <div class="col-md-4">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Gerenciar Clientes</h5>
             <p class="card-text">Cadastre e gerencie os clientes do sistema.</p>
             <a href="/ui/clientes" class="btn btn-secondary">Ver Clientes</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Gerenciar Aluguéis</h5>
+            <p class="card-text">Controle os aluguéis de caçambas do sistema.</p>
+            <a href="/ui/alugueis" class="btn btn-success">Ver Aluguéis</a>
           </div>
         </div>
       </div>

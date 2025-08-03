@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.eccolimp.cacamba_manager.domain.service.AluguelService;
 import com.eccolimp.cacamba_manager.dto.AluguelDTO;
+import com.eccolimp.cacamba_manager.dto.NovoAluguelRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +27,7 @@ public class AluguelController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public AluguelDTO registrar(@RequestBody @Valid NovoAluguelRequest req) {
-        return aluguelService.registrar(
-                req.clienteId(), req.cacambaId(),
-                req.endereco(), req.dias());
+        return aluguelService.registrar(req);
     }
 
     @GetMapping("/ativos")

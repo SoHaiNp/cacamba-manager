@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,6 +36,10 @@ public class Aluguel {
 
     @Column(name = "data_fim", nullable = false)
     private LocalDate dataFim;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 12)
+    private StatusAluguel status = StatusAluguel.ATIVO;
 
     // Getters e Setters
     public Long getId() {
@@ -82,5 +88,13 @@ public class Aluguel {
 
     public void setDataFim(LocalDate dataFim) {
         this.dataFim = dataFim;
+    }
+
+    public StatusAluguel getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusAluguel status) {
+        this.status = status;
     }
 }

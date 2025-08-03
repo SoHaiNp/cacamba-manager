@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/main}">
+<body>
+  <section layout:fragment="content" th:with="title='Detalhes do Aluguel'">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Detalhes do Aluguel</h1>
+      <a th:href="@{/ui/alugueis}" class="btn btn-secondary">Voltar</a>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h5>Informações do Cliente</h5>
+            <table class="table table-borderless">
+              <tr>
+                <td><strong>Nome:</strong></td>
+                <td th:text="${aluguel.clienteNome}">João Silva</td>
+              </tr>
+              <tr>
+                <td><strong>Contato:</strong></td>
+                <td th:text="${aluguel.clienteContato}">(11) 99999-9999</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div class="col-md-6">
+            <h5>Informações da Caçamba</h5>
+            <table class="table table-borderless">
+              <tr>
+                <td><strong>Código:</strong></td>
+                <td th:text="${aluguel.cacambaCodigo}">CX-001</td>
+              </tr>
+              <tr>
+                <td><strong>Capacidade:</strong></td>
+                <td th:text="${aluguel.cacambaCapacidade + ' m³'}">5 m³</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        
+        <hr>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <h5>Informações do Aluguel</h5>
+            <table class="table table-borderless">
+              <tr>
+                <td><strong>Endereço:</strong></td>
+                <td th:text="${aluguel.endereco}">Rua A, 123</td>
+              </tr>
+              <tr>
+                <td><strong>Data de Início:</strong></td>
+                <td th:text="${#temporals.format(aluguel.dataInicio, 'dd/MM/yyyy')}">01/01/2024</td>
+              </tr>
+              <tr>
+                <td><strong>Data de Fim:</strong></td>
+                <td th:text="${#temporals.format(aluguel.dataFim, 'dd/MM/yyyy')}">05/01/2024</td>
+              </tr>
+              <tr>
+                <td><strong>Status:</strong></td>
+                <td>
+                  <span th:class="${aluguel.status.name() == 'ATIVO' ? 'badge bg-success' : aluguel.status.name() == 'FINALIZADO' ? 'badge bg-secondary' : 'badge bg-danger'}"
+                        th:text="${aluguel.status}">ATIVO</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Dias Restantes:</strong></td>
+                <td>
+                  <span th:if="${aluguel.diasRestantes > 0}" th:text="${aluguel.diasRestantes}" class="text-success"></span>
+                  <span th:if="${aluguel.diasRestantes == 0}" class="text-warning">Vence hoje</span>
+                  <span th:if="${aluguel.diasRestantes < 0}" class="text-danger">Vencido</span>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Ações -->
+        <div class="mt-4" th:if="${aluguel.status.name() == 'ATIVO'}">
+          <form th:action="@{'/ui/alugueis/' + ${aluguel.id} + '/finalizar'}" method="post" class="d-inline">
+            <button class="btn btn-success" onclick="return confirm('Finalizar aluguel?')">Finalizar Aluguel</button>
+          </form>
+          <form th:action="@{'/ui/alugueis/' + ${aluguel.id} + '/cancelar'}" method="post" class="d-inline">
+            <button class="btn btn-outline-danger" onclick="return confirm('Cancelar aluguel?')">Cancelar Aluguel</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</body>
+</html> 

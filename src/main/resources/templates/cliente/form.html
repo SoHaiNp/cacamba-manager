@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<body>
+  <section layout:fragment="content" th:with="novo=${cliente.id == null}">
+    <h1 th:text="${novo} ? 'Novo Cliente' : 'Editar Cliente'"></h1>
+
+    <form th:action="${novo} ? @{/ui/clientes} : @{/ui/clientes/{id}(id=${cliente.id})}"
+          th:object="${cliente}" method="post" class="row g-3 needs-validation" novalidate>
+
+      <div class="col-md-6">
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-control" th:field="*{nome}" required>
+        <div class="invalid-feedback" th:errors="*{nome}"></div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Contato</label>
+        <input type="text" class="form-control" th:field="*{contato}" 
+               placeholder="(11) 99999-9999" required>
+        <div class="invalid-feedback" th:errors="*{contato}"></div>
+      </div>
+
+      <div class="col-12">
+        <button class="btn btn-success" type="submit">Salvar</button>
+        <a class="btn btn-secondary" th:href="@{/ui/clientes}">Cancelar</a>
+      </div>
+    </form>
+  </section>
+
+  <script>
+    // Bootstrap client-side validation
+    (() => {
+       'use strict';
+       const forms = document.querySelectorAll('.needs-validation');
+       Array.from(forms).forEach(form => {
+         form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+         }, false);
+       });
+    })();
+  </script>
+</body>
+</html> 

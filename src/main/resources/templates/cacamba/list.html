@@ -32,12 +32,20 @@
         <tr th:each="c : ${cacambas.content}">
           <td th:text="${c.id}">1</td>
           <td th:text="${c.codigo}">CAC-001</td>
-          <td th:text="${c.status}">DISPONIVEL</td>
+          <td>
+            <span th:class="${c.status.name() == 'DISPONIVEL' ? 'badge bg-success' : c.status.name() == 'ALUGADA' ? 'badge bg-warning' : 'badge bg-secondary'}"
+                  th:text="${c.status}">DISPONIVEL</span>
+          </td>
           <td>
             <a th:href="@{'/ui/cacambas/' + ${c.id} + '/editar'}" class="btn btn-sm btn-secondary">Editar</a>
-                         <form th:action="@{'/ui/cacambas/' + ${c.id} + '/delete'}" method="post" class="d-inline">
-               <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir?')">Excluir</button>
-             </form>
+            <form th:action="@{'/ui/cacambas/' + ${c.id} + '/delete'}" method="post" class="d-inline">
+              <button class="btn btn-sm btn-outline-danger" 
+                      th:disabled="${c.status.name() == 'ALUGADA'}"
+                      onclick="return confirm('Excluir?')" 
+                      th:title="${c.status.name() == 'ALUGADA' ? 'Não é possível excluir uma caçamba alugada' : 'Excluir caçamba'}">
+                Excluir
+              </button>
+            </form>
           </td>
         </tr>
       </tbody>

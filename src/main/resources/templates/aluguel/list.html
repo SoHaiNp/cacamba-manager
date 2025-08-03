@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/main}">
+<body>
+  <section layout:fragment="content" th:with="title='Aluguéis'">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Aluguéis</h1>
+      <a th:href="@{/ui/alugueis/novo}" class="btn btn-success">Novo Aluguel</a>
+    </div>
+
+    <!-- Alertas -->
+    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <span th:text="${mensagem}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span th:text="${erro}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Tabela -->
+    <div class="card">
+      <div class="card-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Cliente</th>
+              <th>Caçamba</th>
+              <th>Endereço</th>
+              <th>Data Início</th>
+              <th>Data Fim</th>
+              <th>Status</th>
+              <th>Dias Restantes</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="a : ${alugueis.content}">
+              <td th:text="${a.id}">1</td>
+              <td th:text="${a.clienteNome}">João Silva</td>
+              <td th:text="${a.cacambaCodigo}">CX-001</td>
+              <td th:text="${a.endereco}">Rua A, 123</td>
+              <td th:text="${#temporals.format(a.dataInicio, 'dd/MM/yyyy')}">01/01/2024</td>
+              <td th:text="${#temporals.format(a.dataFim, 'dd/MM/yyyy')}">05/01/2024</td>
+              <td>
+                <span th:class="${a.status.name() == 'ATIVO' ? 'badge bg-success' : a.status.name() == 'FINALIZADO' ? 'badge bg-secondary' : 'badge bg-danger'}"
+                      th:text="${a.status}">ATIVO</span>
+              </td>
+              <td>
+                <span th:if="${a.diasRestantes > 0}" th:text="${a.diasRestantes}" class="text-success"></span>
+                <span th:if="${a.diasRestantes == 0}" class="text-warning">Vence hoje</span>
+                <span th:if="${a.diasRestantes < 0}" class="text-danger">Vencido</span>
+              </td>
+              <td>
+                <a th:href="@{'/ui/alugueis/' + ${a.id}}" class="btn btn-sm btn-info">Ver</a>
+                <form th:if="${a.status.name() == 'ATIVO'}" 
+                      th:action="@{'/ui/alugueis/' + ${a.id} + '/finalizar'}" 
+                      method="post" class="d-inline">
+                  <button class="btn btn-sm btn-success" onclick="return confirm('Finalizar aluguel?')">Finalizar</button>
+                </form>
+                <form th:if="${a.status.name() == 'ATIVO'}" 
+                      th:action="@{'/ui/alugueis/' + ${a.id} + '/cancelar'}" 
+                      method="post" class="d-inline">
+                  <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Cancelar aluguel?')">Cancelar</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Paginação -->
+        <nav th:if="${alugueis.totalPages > 1}">
+          <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${alugueis.first} ? 'disabled'">
+              <a class="page-link" th:href="@{/ui/alugueis(page=${alugueis.number - 1})}">Anterior</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, alugueis.totalPages - 1)}"
+                th:classappend="${i == alugueis.number} ? 'active'">
+              <a class="page-link" th:href="@{/ui/alugueis(page=${i})}" th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${alugueis.last} ? 'disabled'">
+              <a class="page-link" th:href="@{/ui/alugueis(page=${alugueis.number + 1})}">Próximo</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </section>
+</body>
+</html> 

@@ -43,13 +43,29 @@ public class CacambaServiceImpl implements CacambaService {
     public CacambaDTO atualizar(Long id, CacambaDTO dto) {
         var entity = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Caçamba não encontrada"));
+        
+        // Verificar se a caçamba está alugada e tentando alterar o status
+        if (entity.getStatus() == StatusCacamba.ALUGADA && dto.status() != StatusCacamba.ALUGADA) {
+            throw new BusinessException("Não é possível alterar o status de uma caçamba alugada. Finalize ou cancele o aluguel primeiro.");
+        }
+        
         entity.setCodigo(dto.codigo());
         entity.setCapacidadeM3(dto.capacidadeM3());
         entity.setStatus(dto.status());
         return mapper.toDto(repo.save(entity));
     }
 
-    @Override public void deletar(Long id) { repo.deleteById(id); }
+    @Override 
+    public void deletar(Long id) { 
+        var entity = repo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Caçamba não encontrada"));
+        
+        if (entity.getStatus() == StatusCacamba.ALUGADA) {
+            throw new BusinessException("Não é possível excluir uma caçamba alugada. Finalize ou cancele o aluguel primeiro.");
+        }
+        
+        repo.deleteById(id); 
+    }
 
     /* ---------- Leituras ---------- */
 

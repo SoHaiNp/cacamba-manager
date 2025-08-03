@@ -6,24 +6,59 @@
   <section layout:fragment="content" th:with="title='Lista de Clientes'">
     <h1 class="mb-3">Lista de Clientes</h1>
 
-    <div class="alert alert-info">
-      <strong>Funcionalidade em desenvolvimento!</strong> 
-      A gestão de clientes será implementada em breve.
+    <!-- Mensagens de feedback -->
+    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <span th:text="${mensagem}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span th:text="${erro}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <a class="btn btn-primary mb-3" href="/ui">Voltar ao Dashboard</a>
+    <a class="btn btn-primary mb-3" th:href="@{/ui/clientes/novo}">Novo Cliente</a>
 
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Funcionalidades Planejadas</h5>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item">Cadastro de clientes</li>
-          <li class="list-group-item">Edição de dados</li>
-          <li class="list-group-item">Histórico de aluguéis</li>
-          <li class="list-group-item">Relatórios</li>
-        </ul>
-      </div>
-    </div>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nome</th>
+          <th>Contato</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="c : ${clientes.content}">
+          <td th:text="${c.id}">1</td>
+          <td th:text="${c.nome}">João Silva</td>
+          <td th:text="${c.contato}">(11) 99999-9999</td>
+          <td>
+            <a th:href="@{'/ui/clientes/' + ${c.id} + '/editar'}" class="btn btn-sm btn-secondary">Editar</a>
+            <form th:action="@{'/ui/clientes/' + ${c.id} + '/delete'}" method="post" class="d-inline">
+              <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir?')">Excluir</button>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- paginação simplificada -->
+    <nav th:if="${clientes.totalPages > 1}">
+      <ul class="pagination">
+        <li class="page-item" th:classappend="${clientes.first}? 'disabled'">
+          <a class="page-link" th:href="@{/ui/clientes(page=${clientes.number - 1})}">Anterior</a>
+        </li>
+        <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, clientes.totalPages - 1)}"
+            th:classappend="${pageNum == clientes.number}? 'active'">
+          <a class="page-link" th:href="@{/ui/clientes(page=${pageNum})}"
+             th:text="${pageNum + 1}">1</a>
+        </li>
+        <li class="page-item" th:classappend="${clientes.last}? 'disabled'">
+          <a class="page-link" th:href="@{/ui/clientes(page=${clientes.number + 1})}">Próxima</a>
+        </li>
+      </ul>
+    </nav>
   </section>
 </body>
 </html> 

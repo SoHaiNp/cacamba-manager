@@ -17,6 +17,7 @@ import com.eccolimp.cacamba_manager.domain.repository.ClienteRepository;
 import com.eccolimp.cacamba_manager.domain.service.AluguelService;
 import com.eccolimp.cacamba_manager.domain.service.exception.BusinessException;
 import com.eccolimp.cacamba_manager.dto.AluguelDTO;
+import com.eccolimp.cacamba_manager.dto.NovoAluguelRequest;
 
 import jakarta.transaction.Transactional;
 
@@ -41,8 +42,8 @@ public class AluguelServiceTest {
         cac.setStatus(StatusCacamba.DISPONIVEL);
         cac = cacambaRepo.save(cac);
 
-        AluguelDTO dto = service.registrar(cli.getId(), cac.getId(),
-                                           "Rua X, 123", 3);
+        AluguelDTO dto = service.registrar(new NovoAluguelRequest(cli.getId(), cac.getId(),
+                                           "Rua X, 123", 3));
 
         assertThat(dto.dataFim()).isEqualTo(LocalDate.now().plusDays(3));
         assertThat(cacambaRepo.findById(cac.getId()).get().getStatus())
@@ -63,7 +64,7 @@ public class AluguelServiceTest {
         final Cacamba cacambaSalva = cacambaRepo.save(cac);
 
         assertThatThrownBy(() -> 
-            service.registrar(clienteSalvo.getId(), cacambaSalva.getId(), "Rua X, 123", 3)
+            service.registrar(new NovoAluguelRequest(clienteSalvo.getId(), cacambaSalva.getId(), "Rua X, 123", 3))
         ).isInstanceOf(BusinessException.class)
          .hasMessage("Caçamba indisponível");
     }
