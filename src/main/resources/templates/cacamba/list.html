@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<body>
+  <section layout:fragment="content" th:with="title='Lista de Caçambas'">
+    <h1 class="mb-3">Lista de Caçambas</h1>
+
+    <!-- Mensagens de feedback -->
+    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <span th:text="${mensagem}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span th:text="${erro}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <a class="btn btn-primary mb-3" th:href="@{/ui/cacambas/novo}">Nova Caçamba</a>
+
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Identificador</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="c : ${cacambas.content}">
+          <td th:text="${c.id}">1</td>
+          <td th:text="${c.codigo}">CAC-001</td>
+          <td th:text="${c.status}">DISPONIVEL</td>
+          <td>
+            <a th:href="@{'/ui/cacambas/' + ${c.id} + '/editar'}" class="btn btn-sm btn-secondary">Editar</a>
+                         <form th:action="@{'/ui/cacambas/' + ${c.id} + '/delete'}" method="post" class="d-inline">
+               <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir?')">Excluir</button>
+             </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- paginação simplificada -->
+    <nav th:if="${cacambas.totalPages > 1}">
+      <ul class="pagination">
+        <li class="page-item" th:classappend="${cacambas.first}? 'disabled'">
+          <a class="page-link" th:href="@{/ui/cacambas(page=${cacambas.number - 1})}">Anterior</a>
+        </li>
+        <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, cacambas.totalPages - 1)}"
+            th:classappend="${pageNum == cacambas.number}? 'active'">
+          <a class="page-link" th:href="@{/ui/cacambas(page=${pageNum})}"
+             th:text="${pageNum + 1}">1</a>
+        </li>
+        <li class="page-item" th:classappend="${cacambas.last}? 'disabled'">
+          <a class="page-link" th:href="@{/ui/cacambas(page=${cacambas.number + 1})}">Próxima</a>
+        </li>
+      </ul>
+    </nav>
+  </section>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/main}">
+<body>
+  <section layout:fragment="content" th:with="title='Dashboard'">
+    <h1 class="mb-4">Dashboard</h1>
+    <p class="lead">Bem‑vindo ao <strong>Caçamba Manager</strong>. Selecione uma opção no menu para começar.</p>
+    
+    <!-- Cards de estatísticas -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Total de Caçambas</h5>
+            <h2 class="text-primary" th:text="${totalCacambas}">0</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Disponíveis</h5>
+            <h2 class="text-success" th:text="${cacambasDisponiveis}">0</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">Alugadas</h5>
+            <h2 class="text-warning" th:text="${cacambasAlugadas}">0</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Links rápidos -->
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Gerenciar Caçambas</h5>
+            <p class="card-text">Adicione, edite ou remova caçambas do sistema.</p>
+            <a href="/ui/cacambas" class="btn btn-primary">Ver Caçambas</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Gerenciar Clientes</h5>
+            <p class="card-text">Cadastre e gerencie os clientes do sistema.</p>
+            <a href="/ui/clientes" class="btn btn-secondary">Ver Clientes</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

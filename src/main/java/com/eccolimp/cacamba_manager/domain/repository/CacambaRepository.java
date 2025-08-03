@@ -1,4 +1,4 @@
-package com.eccolimp.cacamba_manager.repository;
+package com.eccolimp.cacamba_manager.domain.repository;
 
 import java.util.List;
 
@@ -9,4 +9,5 @@ import com.eccolimp.cacamba_manager.domain.model.StatusCacamba;
 
 public interface CacambaRepository extends JpaRepository<Cacamba, Long> {
     List<Cacamba> findByStatus(StatusCacamba status);
+    boolean existsByCodigoIgnoreCase(String codigo);
 }

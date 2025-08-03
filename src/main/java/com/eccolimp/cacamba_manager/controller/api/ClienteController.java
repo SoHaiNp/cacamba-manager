@@ -1,4 +1,4 @@
-package com.eccolimp.cacamba_manager.controller;
+package com.eccolimp.cacamba_manager.controller.api;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eccolimp.cacamba_manager.domain.model.Cliente;
+import com.eccolimp.cacamba_manager.domain.repository.ClienteRepository;
 import com.eccolimp.cacamba_manager.dto.ClienteDTO;
 import com.eccolimp.cacamba_manager.mapper.ClienteMapper;
-import com.eccolimp.cacamba_manager.repository.ClienteRepository;
 
 import lombok.RequiredArgsConstructor;
 

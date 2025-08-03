@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.eccolimp.cacamba_manager.repository.ClienteRepository;
+import com.eccolimp.cacamba_manager.domain.model.Cliente;
+import com.eccolimp.cacamba_manager.domain.repository.ClienteRepository;
 
 @SpringBootTest
 public class RepositorySmokeTest {

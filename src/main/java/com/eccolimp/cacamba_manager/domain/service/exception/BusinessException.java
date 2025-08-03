@@ -1,4 +1,4 @@
-package com.eccolimp.cacamba_manager.service;
+package com.eccolimp.cacamba_manager.domain.service.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

@@ -1,0 +1,1 @@
+console.log('Caçamba Manager frontend carregado');

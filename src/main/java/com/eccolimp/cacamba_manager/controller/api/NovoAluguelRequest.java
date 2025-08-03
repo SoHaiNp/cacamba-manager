@@ -1,4 +1,4 @@
-package com.eccolimp.cacamba_manager.controller;
+package com.eccolimp.cacamba_manager.controller.api;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

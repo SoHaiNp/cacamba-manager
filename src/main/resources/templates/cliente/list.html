@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<body>
+  <section layout:fragment="content" th:with="title='Lista de Clientes'">
+    <h1 class="mb-3">Lista de Clientes</h1>
+
+    <div class="alert alert-info">
+      <strong>Funcionalidade em desenvolvimento!</strong> 
+      A gestão de clientes será implementada em breve.
+    </div>
+
+    <a class="btn btn-primary mb-3" href="/ui">Voltar ao Dashboard</a>
+
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Funcionalidades Planejadas</h5>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">Cadastro de clientes</li>
+          <li class="list-group-item">Edição de dados</li>
+          <li class="list-group-item">Histórico de aluguéis</li>
+          <li class="list-group-item">Relatórios</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</body>
+</html> 

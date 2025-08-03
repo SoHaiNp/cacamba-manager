@@ -12,11 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.eccolimp.cacamba_manager.domain.model.Cacamba;
 import com.eccolimp.cacamba_manager.domain.model.Cliente;
 import com.eccolimp.cacamba_manager.domain.model.StatusCacamba;
+import com.eccolimp.cacamba_manager.domain.repository.CacambaRepository;
+import com.eccolimp.cacamba_manager.domain.repository.ClienteRepository;
+import com.eccolimp.cacamba_manager.domain.service.AluguelService;
+import com.eccolimp.cacamba_manager.domain.service.exception.BusinessException;
 import com.eccolimp.cacamba_manager.dto.AluguelDTO;
-import com.eccolimp.cacamba_manager.repository.CacambaRepository;
-import com.eccolimp.cacamba_manager.repository.ClienteRepository;
-import com.eccolimp.cacamba_manager.service.AluguelService;
-import com.eccolimp.cacamba_manager.service.BusinessException;
 
 import jakarta.transaction.Transactional;
 

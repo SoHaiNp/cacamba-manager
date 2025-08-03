@@ -1,4 +1,4 @@
-package com.eccolimp.cacamba_manager.repository;
+package com.eccolimp.cacamba_manager.domain.repository;
 
 import java.time.LocalDate;
 import java.util.List;

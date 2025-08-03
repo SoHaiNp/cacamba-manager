@@ -1,4 +1,4 @@
-package com.eccolimp.cacamba_manager.controller;
+package com.eccolimp.cacamba_manager.controller.api;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.eccolimp.cacamba_manager.domain.service.AluguelService;
 import com.eccolimp.cacamba_manager.dto.AluguelDTO;
-import com.eccolimp.cacamba_manager.service.AluguelService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

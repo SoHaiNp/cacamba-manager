@@ -1,4 +1,4 @@
-package com.eccolimp.cacamba_manager.service;
+package com.eccolimp.cacamba_manager.domain.service;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,11 +9,12 @@ import com.eccolimp.cacamba_manager.domain.model.Aluguel;
 import com.eccolimp.cacamba_manager.domain.model.Cacamba;
 import com.eccolimp.cacamba_manager.domain.model.Cliente;
 import com.eccolimp.cacamba_manager.domain.model.StatusCacamba;
+import com.eccolimp.cacamba_manager.domain.repository.AluguelRepository;
+import com.eccolimp.cacamba_manager.domain.repository.CacambaRepository;
+import com.eccolimp.cacamba_manager.domain.repository.ClienteRepository;
+import com.eccolimp.cacamba_manager.domain.service.exception.BusinessException;
 import com.eccolimp.cacamba_manager.dto.AluguelDTO;
 import com.eccolimp.cacamba_manager.mapper.AluguelMapper;
-import com.eccolimp.cacamba_manager.repository.AluguelRepository;
-import com.eccolimp.cacamba_manager.repository.CacambaRepository;
-import com.eccolimp.cacamba_manager.repository.ClienteRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
