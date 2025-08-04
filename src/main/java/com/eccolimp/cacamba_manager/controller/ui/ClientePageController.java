@@ -34,7 +34,7 @@ public class ClientePageController {
         return "cliente/form";
     }
 
-    @PostMapping
+    @PostMapping("/salvar")
     public String salvar(ClienteDTO cliente, RedirectAttributes redirectAttributes) {
         try {
             service.criar(cliente);

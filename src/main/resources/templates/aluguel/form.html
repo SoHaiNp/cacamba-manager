@@ -1,79 +1,166 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org"
-      layout:decorate="~{layouts/main}">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Aluguel - Gerenciador de Caçambas</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
 <body>
-  <section layout:fragment="content" th:with="title='Novo Aluguel'">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1>Novo Aluguel</h1>
-      <a th:href="@{/ui/alugueis}" class="btn btn-secondary">Voltar</a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/ui}">
+                <i class="bi bi-truck"></i>
+                Gerenciador de Caçambas
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/ui/cacambas}">
+                            <i class="bi bi-box"></i> Caçambas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/ui/clientes}">
+                            <i class="bi bi-people"></i> Clientes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/ui/alugueis}">
+                            <i class="bi bi-calendar-check"></i> Aluguéis
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="bi bi-calendar-plus"></i> Novo Aluguel</h2>
+                <p class="text-muted mb-0">Registre um novo aluguel de caçamba</p>
+            </div>
+            <a th:href="@{/ui/alugueis}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+
+        <!-- Mensagens de Feedback -->
+        <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span th:text="${erro}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Formulário -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <i class="bi bi-pencil-square"></i> Dados do Novo Aluguel
+            </div>
+            <div class="card-body">
+                <form th:object="${novoAluguel}" th:action="@{/ui/alugueis/salvar}" method="post" class="needs-validation" novalidate>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="clienteId" class="form-label">
+                                <i class="bi bi-person"></i> Cliente *
+                            </label>
+                            <select class="form-select" 
+                                    id="clienteId" 
+                                    th:field="*{clienteId}" 
+                                    title="Selecione o cliente"
+                                    required>
+                                <option value="">Selecione um cliente</option>
+                                <option th:each="cliente : ${clientes}" 
+                                        th:value="${cliente.id}" 
+                                        th:text="${cliente.nome + ' - ' + cliente.contato}">
+                                    João Silva - (11) 99999-9999
+                                </option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Por favor, selecione um cliente.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="cacambaId" class="form-label">
+                                <i class="bi bi-box"></i> Caçamba *
+                            </label>
+                            <select class="form-select" 
+                                    id="cacambaId" 
+                                    th:field="*{cacambaId}" 
+                                    title="Selecione uma caçamba disponível"
+                                    required>
+                                <option value="">Selecione uma caçamba</option>
+                                <option th:each="cacamba : ${cacambas}" 
+                                        th:value="${cacamba.id}" 
+                                        th:text="${cacamba.codigo + ' - ' + cacamba.capacidadeM3 + 'm³'}">
+                                    C001 - 6m³
+                                </option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Por favor, selecione uma caçamba.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="endereco" class="form-label">
+                                <i class="bi bi-geo-alt"></i> Endereço *
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="endereco" 
+                                   th:field="*{endereco}" 
+                                   title="Endereço onde a caçamba será entregue"
+                                   required>
+                            <div class="invalid-feedback">
+                                Por favor, informe o endereço de entrega.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="dias" class="form-label">
+                                <i class="bi bi-calendar-range"></i> Dias de Aluguel *
+                            </label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="dias" 
+                                   th:field="*{dias}" 
+                                   title="Quantidade de dias para o aluguel"
+                                   min="1" 
+                                   max="365" 
+                                   required>
+                            <div class="invalid-feedback">
+                                Por favor, informe a quantidade de dias (1-365).
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a th:href="@{/ui/alugueis}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-loading">
+                            <i class="bi bi-check-circle"></i> Registrar Aluguel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <div class="card">
-      <div class="card-body">
-        <form th:action="@{/ui/alugueis}" method="post" class="row g-3 needs-validation" novalidate>
-          <div class="col-md-6">
-            <label class="form-label">Cliente</label>
-            <select class="form-select" name="clienteId" required>
-              <option value="">Selecione um cliente</option>
-              <option th:each="c : ${clientes}" 
-                      th:value="${c.id}" 
-                      th:text="${c.nome + ' - ' + c.contato}">João Silva - (11) 99999-9999</option>
-            </select>
-            <div class="invalid-feedback">Selecione um cliente</div>
-          </div>
-          
-          <div class="col-md-6">
-            <label class="form-label">Caçamba</label>
-            <select class="form-select" name="cacambaId" required>
-              <option value="">Selecione uma caçamba</option>
-              <option th:each="c : ${cacambas}" 
-                      th:value="${c.id}" 
-                      th:text="${c.codigo + ' (' + c.capacidadeM3 + 'm³)'}">CX-001 (5m³)</option>
-            </select>
-            <div class="invalid-feedback">Selecione uma caçamba</div>
-          </div>
-          
-          <div class="col-12">
-            <label class="form-label">Endereço</label>
-            <input type="text" class="form-control" name="endereco" 
-                   placeholder="Rua, número, bairro, cidade" required>
-            <div class="invalid-feedback">Informe o endereço</div>
-          </div>
-          
-          <div class="col-md-6">
-            <label class="form-label">Dias de Aluguel</label>
-            <input type="number" class="form-control" name="dias" 
-                   min="1" max="365" value="7" required>
-            <div class="invalid-feedback">Informe o número de dias</div>
-          </div>
-          
-          <div class="col-12">
-            <button class="btn btn-success" type="submit">Registrar Aluguel</button>
-            <a class="btn btn-secondary" th:href="@{/ui/alugueis}">Cancelar</a>
-          </div>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <script th:inline="javascript">
-    // Validação do Bootstrap
-    (function() {
-      'use strict';
-      window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
-        var validation = Array.prototype.filter.call(forms, function(form) {
-          form.addEventListener('submit', function(event) {
-            if (form.checkValidity() === false) {
-              event.preventDefault();
-              event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-          }, false);
-        });
-      }, false);
-    })();
-  </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/app.js}"></script>
 </body>
 </html> 

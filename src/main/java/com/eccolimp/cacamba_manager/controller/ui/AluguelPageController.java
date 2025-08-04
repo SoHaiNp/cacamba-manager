@@ -46,7 +46,7 @@ public class AluguelPageController {
 
     @GetMapping("/novo")
     public String novo(Model model) {
-        model.addAttribute("novo", true);
+        model.addAttribute("novoAluguel", new NovoAluguelRequest(null, null, null, 0));
         model.addAttribute("clientes", clienteService.listarTodos());
         model.addAttribute("cacambas", cacambaService.listarTodas().stream()
                 .filter(c -> c.status().name().equals("DISPONIVEL"))
@@ -54,7 +54,7 @@ public class AluguelPageController {
         return "aluguel/form";
     }
 
-    @PostMapping
+    @PostMapping("/salvar")
     public String salvar(NovoAluguelRequest request, RedirectAttributes redirectAttributes) {
         try {
             aluguelService.registrar(request);

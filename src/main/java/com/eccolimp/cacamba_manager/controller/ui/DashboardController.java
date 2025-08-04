@@ -25,7 +25,7 @@ public class DashboardController {
         // Otimizar consultas - buscar uma única vez e filtrar em memória
         var todasCacambas = cacambaService.listarTodas();
         var todosClientes = clienteService.listarTodos();
-        var alugueisVencendo = aluguelService.listarVencendoEm(3);
+        var alertasVencimento = aluguelService.buscarAlertasVencimento();
         
         model.addAttribute("totalCacambas", todasCacambas.size());
         model.addAttribute("cacambasDisponiveis", todasCacambas.stream()
@@ -36,7 +36,7 @@ public class DashboardController {
                 .count());
         model.addAttribute("totalClientes", todosClientes.size());
         model.addAttribute("alugueisAtivos", aluguelService.countAtivos());
-        model.addAttribute("alugueisVencendo", alugueisVencendo.size());
+        model.addAttribute("alertasVencimento", alertasVencimento);
         
         return "dashboard/index";
     }

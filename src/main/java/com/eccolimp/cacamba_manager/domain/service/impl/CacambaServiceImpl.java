@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.eccolimp.cacamba_manager.domain.model.StatusCacamba;
 import com.eccolimp.cacamba_manager.domain.repository.CacambaRepository;
+import com.eccolimp.cacamba_manager.domain.repository.AluguelRepository;
 import com.eccolimp.cacamba_manager.domain.service.CacambaService;
 import com.eccolimp.cacamba_manager.domain.service.exception.BusinessException;
 import com.eccolimp.cacamba_manager.dto.CacambaDTO;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class CacambaServiceImpl implements CacambaService {
 
     private final CacambaRepository repo;
+    private final AluguelRepository aluguelRepo;
     private final CacambaMapper mapper;
 
     /** Criar uma nova caçamba – código deve ser único. */
@@ -62,6 +64,12 @@ public class CacambaServiceImpl implements CacambaService {
         
         if (entity.getStatus() == StatusCacamba.ALUGADA) {
             throw new BusinessException("Não é possível excluir uma caçamba alugada. Finalize ou cancele o aluguel primeiro.");
+        }
+        
+        // Verificar se há aluguéis associados a esta caçamba
+        var alugueis = aluguelRepo.findByCacambaId(id);
+        if (!alugueis.isEmpty()) {
+            throw new BusinessException("Não é possível excluir uma caçamba que possui histórico de aluguéis. Considere alterar o status para 'Manutenção' em vez de excluir.");
         }
         
         repo.deleteById(id); 

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.eccolimp.cacamba_manager.domain.repository.ClienteRepository;
+import com.eccolimp.cacamba_manager.domain.repository.AluguelRepository;
 import com.eccolimp.cacamba_manager.domain.service.ClienteService;
 import com.eccolimp.cacamba_manager.domain.service.exception.BusinessException;
 import com.eccolimp.cacamba_manager.dto.ClienteDTO;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class ClienteServiceImpl implements ClienteService {
 
     private final ClienteRepository repo;
+    private final AluguelRepository aluguelRepo;
     private final ClienteMapper mapper;
 
     @Override
@@ -56,6 +58,13 @@ public class ClienteServiceImpl implements ClienteService {
         if (!repo.existsById(id)) {
             throw new EntityNotFoundException("Cliente não encontrado");
         }
+        
+        // Verificar se há aluguéis associados a este cliente
+        var alugueis = aluguelRepo.findByClienteId(id);
+        if (!alugueis.isEmpty()) {
+            throw new BusinessException("Não é possível excluir um cliente que possui histórico de aluguéis. Os dados são mantidos para fins de auditoria.");
+        }
+        
         repo.deleteById(id);
     }
 

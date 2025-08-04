@@ -1,94 +1,251 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org"
-      layout:decorate="~{layouts/main}">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Aluguel - Gerenciador de Caçambas</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
 <body>
-  <section layout:fragment="content" th:with="title='Detalhes do Aluguel'">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1>Detalhes do Aluguel</h1>
-      <a th:href="@{/ui/alugueis}" class="btn btn-secondary">Voltar</a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/ui}">
+                <i class="bi bi-truck"></i>
+                Gerenciador de Caçambas
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/ui/cacambas}">
+                            <i class="bi bi-box"></i> Caçambas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/ui/clientes}">
+                            <i class="bi bi-people"></i> Clientes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/ui/alugueis}">
+                            <i class="bi bi-calendar-check"></i> Aluguéis
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="bi bi-calendar-check"></i> Detalhes do Aluguel</h2>
+                <p class="text-muted mb-0">Informações completas sobre o aluguel</p>
+            </div>
+            <a th:href="@{/ui/alugueis}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+
+        <!-- Mensagens de Feedback -->
+        <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i>
+            <span th:text="${mensagem}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span th:text="${erro}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Detalhes do Aluguel -->
+        <div class="row">
+            <!-- Informações do Aluguel -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-info-circle"></i> Informações do Aluguel
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-calendar"></i> Data de Início
+                                </label>
+                                <p class="mb-0" th:text="${#temporals.format(aluguel.dataInicio, 'dd/MM/yyyy')}">01/01/2024</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-calendar-check"></i> Data de Fim
+                                </label>
+                                <p class="mb-0" th:text="${#temporals.format(aluguel.dataFim, 'dd/MM/yyyy')}">08/01/2024</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-clock"></i> Duração
+                                </label>
+                                <p class="mb-0">
+                                    <span th:text="${#temporals.format(aluguel.dataInicio, 'dd/MM/yyyy')}">01/01/2024</span> a 
+                                    <span th:text="${#temporals.format(aluguel.dataFim, 'dd/MM/yyyy')}">08/01/2024</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-info-circle"></i> Status
+                                </label>
+                                <p class="mb-0">
+                                    <span th:if="${aluguel.status.name() == 'ATIVO'}" class="badge bg-success">
+                                        <i class="bi bi-play-circle"></i> Ativo
+                                    </span>
+                                    <span th:if="${aluguel.status.name() == 'FINALIZADO'}" class="badge bg-secondary">
+                                        <i class="bi bi-check-circle"></i> Finalizado
+                                    </span>
+                                    <span th:if="${aluguel.status.name() == 'CANCELADO'}" class="badge bg-danger">
+                                        <i class="bi bi-x-circle"></i> Cancelado
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-geo-alt"></i> Endereço de Entrega
+                                </label>
+                                <p class="mb-0" th:text="${aluguel.endereco}">Rua das Flores, 123 - Centro - São Paulo/SP</p>
+                            </div>
+                        </div>
+                        <div class="row" th:if="${aluguel.diasRestantes != null}">
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-clock-history"></i> Dias Restantes
+                                </label>
+                                <p class="mb-0">
+                                    <span th:if="${aluguel.diasRestantes > 0}" 
+                                          th:class="${aluguel.diasRestantes <= 2 ? 'text-danger fw-bold' : aluguel.diasRestantes <= 7 ? 'text-warning' : 'text-success'}"
+                                          th:text="${aluguel.diasRestantes} + ' dias restantes'">
+                                        5 dias restantes
+                                    </span>
+                                    <span th:if="${aluguel.diasRestantes == 0}" class="text-danger fw-bold">
+                                        <i class="bi bi-exclamation-triangle"></i> Vence hoje!
+                                    </span>
+                                    <span th:if="${aluguel.diasRestantes < 0}" class="text-danger fw-bold">
+                                        <i class="bi bi-exclamation-triangle"></i> Vencido há <span th:text="${-aluguel.diasRestantes}">2</span> dias
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações do Cliente e Caçamba -->
+            <div class="col-lg-4">
+                <!-- Cliente -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-person"></i> Cliente
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-title" th:text="${aluguel.clienteNome}">João Silva</h6>
+                        <p class="card-text text-muted" th:text="${aluguel.clienteContato}">(11) 99999-9999</p>
+                    </div>
+                </div>
+
+                <!-- Caçamba -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-box"></i> Caçamba
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-title" th:text="${aluguel.cacambaCodigo}">C001</h6>
+                        <p class="card-text text-muted" th:text="${aluguel.cacambaCapacidade} + 'm³'">6m³</p>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="card border-0 shadow-sm" th:if="${aluguel.status.name() == 'ATIVO'}">
+                    <div class="card-header">
+                        <i class="bi bi-gear"></i> Ações
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="button" 
+                                    class="btn btn-success" 
+                                                                         title="Finalizar aluguel"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#finalizarModal">
+                                <i class="bi bi-check-circle"></i> Finalizar Aluguel
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-danger" 
+                                                                         title="Cancelar aluguel"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#cancelarModal">
+                                <i class="bi bi-x-circle"></i> Cancelar Aluguel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="card">
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-6">
-            <h5>Informações do Cliente</h5>
-            <table class="table table-borderless">
-              <tr>
-                <td><strong>Nome:</strong></td>
-                <td th:text="${aluguel.clienteNome}">João Silva</td>
-              </tr>
-              <tr>
-                <td><strong>Contato:</strong></td>
-                <td th:text="${aluguel.clienteContato}">(11) 99999-9999</td>
-              </tr>
-            </table>
-          </div>
-          
-          <div class="col-md-6">
-            <h5>Informações da Caçamba</h5>
-            <table class="table table-borderless">
-              <tr>
-                <td><strong>Código:</strong></td>
-                <td th:text="${aluguel.cacambaCodigo}">CX-001</td>
-              </tr>
-              <tr>
-                <td><strong>Capacidade:</strong></td>
-                <td th:text="${aluguel.cacambaCapacidade + ' m³'}">5 m³</td>
-              </tr>
-            </table>
-          </div>
+    <!-- Modal de confirmação de finalização -->
+    <div class="modal fade" id="finalizarModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Finalização</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja finalizar este aluguel?</p>
+                    <p class="text-muted">A caçamba ficará disponível para novos aluguéis.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form th:action="@{/ui/alugueis/{id}/finalizar(id=${aluguel.id})}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-success">Finalizar</button>
+                    </form>
+                </div>
+            </div>
         </div>
-        
-        <hr>
-        
-        <div class="row">
-          <div class="col-md-6">
-            <h5>Informações do Aluguel</h5>
-            <table class="table table-borderless">
-              <tr>
-                <td><strong>Endereço:</strong></td>
-                <td th:text="${aluguel.endereco}">Rua A, 123</td>
-              </tr>
-              <tr>
-                <td><strong>Data de Início:</strong></td>
-                <td th:text="${#temporals.format(aluguel.dataInicio, 'dd/MM/yyyy')}">01/01/2024</td>
-              </tr>
-              <tr>
-                <td><strong>Data de Fim:</strong></td>
-                <td th:text="${#temporals.format(aluguel.dataFim, 'dd/MM/yyyy')}">05/01/2024</td>
-              </tr>
-              <tr>
-                <td><strong>Status:</strong></td>
-                <td>
-                  <span th:class="${aluguel.status.name() == 'ATIVO' ? 'badge bg-success' : aluguel.status.name() == 'FINALIZADO' ? 'badge bg-secondary' : 'badge bg-danger'}"
-                        th:text="${aluguel.status}">ATIVO</span>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>Dias Restantes:</strong></td>
-                <td>
-                  <span th:if="${aluguel.diasRestantes > 0}" th:text="${aluguel.diasRestantes}" class="text-success"></span>
-                  <span th:if="${aluguel.diasRestantes == 0}" class="text-warning">Vence hoje</span>
-                  <span th:if="${aluguel.diasRestantes < 0}" class="text-danger">Vencido</span>
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
-        
-        <!-- Ações -->
-        <div class="mt-4" th:if="${aluguel.status.name() == 'ATIVO'}">
-          <form th:action="@{'/ui/alugueis/' + ${aluguel.id} + '/finalizar'}" method="post" class="d-inline">
-            <button class="btn btn-success" onclick="return confirm('Finalizar aluguel?')">Finalizar Aluguel</button>
-          </form>
-          <form th:action="@{'/ui/alugueis/' + ${aluguel.id} + '/cancelar'}" method="post" class="d-inline">
-            <button class="btn btn-outline-danger" onclick="return confirm('Cancelar aluguel?')">Cancelar Aluguel</button>
-          </form>
-        </div>
-      </div>
     </div>
-  </section>
+
+    <!-- Modal de confirmação de cancelamento -->
+    <div class="modal fade" id="cancelarModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Cancelamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja cancelar este aluguel?</p>
+                    <p class="text-muted">A caçamba ficará disponível para novos aluguéis.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form th:action="@{/ui/alugueis/{id}/cancelar(id=${aluguel.id})}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">Cancelar Aluguel</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/app.js}"></script>
 </body>
 </html> 

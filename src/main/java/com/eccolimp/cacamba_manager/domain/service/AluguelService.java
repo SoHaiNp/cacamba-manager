@@ -20,6 +20,8 @@ import com.eccolimp.cacamba_manager.domain.service.exception.BusinessException;
 import com.eccolimp.cacamba_manager.dto.AluguelDTO;
 import com.eccolimp.cacamba_manager.dto.AluguelDetalhadoDTO;
 import com.eccolimp.cacamba_manager.dto.NovoAluguelRequest;
+import com.eccolimp.cacamba_manager.dto.AluguelVencendoDTO;
+import com.eccolimp.cacamba_manager.dto.AlertasVencimentoDTO;
 import com.eccolimp.cacamba_manager.mapper.AluguelMapper;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -140,11 +142,64 @@ public class AluguelService {
 
     @Transactional(readOnly = true)
     public List<AluguelDTO> listarVencendoEm(int dias) {
-        LocalDate dataLimite = LocalDate.now().plusDays(dias);
-        return aluguelRepository.findVencendoEm(dataLimite)
+        LocalDate hoje = LocalDate.now();
+        LocalDate dataLimite = hoje.plusDays(dias);
+        return aluguelRepository.findVencendoEm(dataLimite, hoje)
                           .stream()
                           .map(aluguelMapper::toDto)
                           .toList();
+    }
+    
+    @Transactional(readOnly = true)
+    public AlertasVencimentoDTO buscarAlertasVencimento() {
+        LocalDate hoje = LocalDate.now();
+        LocalDate amanha = hoje.plusDays(1);
+        LocalDate dataLimite = hoje.plusDays(3);
+        
+        // Buscar aluguéis vencendo hoje
+        var vencendoHoje = aluguelRepository.findVencendoNaData(hoje)
+                .stream()
+                .map(this::toAluguelVencendoDTO)
+                .toList();
+        
+        // Buscar aluguéis vencendo amanhã
+        var vencendoAmanha = aluguelRepository.findVencendoNaData(amanha)
+                .stream()
+                .map(this::toAluguelVencendoDTO)
+                .toList();
+        
+        // Buscar aluguéis vencendo nos próximos dias (2 e 3 dias)
+        var vencendoProximosDias = aluguelRepository.findVencendoEm(dataLimite, amanha.plusDays(1))
+                .stream()
+                .map(this::toAluguelVencendoDTO)
+                .toList();
+        
+        int total = vencendoHoje.size() + vencendoAmanha.size() + vencendoProximosDias.size();
+        
+        return new AlertasVencimentoDTO(vencendoHoje, vencendoAmanha, vencendoProximosDias, total);
+    }
+    
+    private AluguelVencendoDTO toAluguelVencendoDTO(Aluguel aluguel) {
+        LocalDate hoje = LocalDate.now();
+        int diasRestantes = (int) java.time.temporal.ChronoUnit.DAYS.between(hoje, aluguel.getDataFim());
+        
+        String tipoVencimento;
+        if (aluguel.getDataFim().equals(hoje)) {
+            tipoVencimento = "HOJE";
+        } else if (aluguel.getDataFim().equals(hoje.plusDays(1))) {
+            tipoVencimento = "AMANHA";
+        } else {
+            tipoVencimento = "PROXIMOS_DIAS";
+        }
+        
+        return new AluguelVencendoDTO(
+            aluguel.getId(),
+            aluguel.getCliente().getNome(),
+            aluguel.getCacamba().getCodigo(),
+            aluguel.getDataFim(),
+            diasRestantes,
+            tipoVencimento
+        );
     }
 
     @Transactional(readOnly = true)

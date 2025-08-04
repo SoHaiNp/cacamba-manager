@@ -1,62 +1,176 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/main}">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:with="novo=${cacamba.id == null}">
+        <span th:if="${novo}">Nova Caçamba</span>
+        <span th:unless="${novo}">Editar Caçamba</span>
+        - Gerenciador de Caçambas
+    </title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
 <body>
-  <section layout:fragment="content" th:with="novo=${cacamba.id == null}">
-    <h1 th:text="${novo} ? 'Nova Caçamba' : 'Editar Caçamba'"></h1>
-
-    <form th:action="${novo} ? @{/ui/cacambas} : @{/ui/cacambas/{id}(id=${cacamba.id})}"
-          th:object="${cacamba}" method="post" class="row g-3 needs-validation" novalidate>
-
-      <div class="col-md-6">
-        <label class="form-label">Código</label>
-        <input type="text" class="form-control" th:field="*{codigo}" required>
-        <div class="invalid-feedback" th:errors="*{codigo}"></div>
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label">Capacidade (m³)</label>
-        <input type="number" class="form-control" th:field="*{capacidadeM3}" required>
-        <div class="invalid-feedback" th:errors="*{capacidadeM3}"></div>
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label">Status</label>
-        <select class="form-select" th:field="*{status}" required 
-                th:disabled="${cacamba.status != null and cacamba.status.name() == 'ALUGADA'}">
-          <option th:each="s : ${T(com.eccolimp.cacamba_manager.domain.model.StatusCacamba).values()}"
-                  th:value="${s}" th:text="${s}">DISPONIVEL</option>
-        </select>
-        <div th:if="${cacamba.status != null and cacamba.status.name() == 'ALUGADA'}" 
-             class="form-text text-warning">
-          <i class="bi bi-exclamation-triangle"></i> 
-          Esta caçamba está alugada. Finalize ou cancele o aluguel para alterar o status.
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/ui}">
+                <i class="bi bi-truck"></i>
+                Gerenciador de Caçambas
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/ui/cacambas}">
+                            <i class="bi bi-box"></i> Caçambas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/ui/clientes}">
+                            <i class="bi bi-people"></i> Clientes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/ui/alugueis}">
+                            <i class="bi bi-calendar-check"></i> Aluguéis
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
-      </div>
+    </nav>
 
-      <div class="col-12">
-        <button class="btn btn-success" type="submit">Salvar</button>
-        <a class="btn btn-secondary" th:href="@{/ui/cacambas}">Cancelar</a>
-      </div>
-    </form>
-  </section>
+    <!-- Conteúdo Principal -->
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>
+                    <i class="bi bi-box"></i>
+                    <span th:with="novo=${cacamba.id == null}">
+                        <span th:if="${novo}">Nova Caçamba</span>
+                        <span th:unless="${novo}">Editar Caçamba</span>
+                    </span>
+                </h2>
+                <p class="text-muted mb-0">
+                    <span th:with="novo=${cacamba.id == null}">
+                        <span th:if="${novo}">Cadastre uma nova caçamba no sistema</span>
+                        <span th:unless="${novo}">Atualize os dados da caçamba</span>
+                    </span>
+                </p>
+            </div>
+            <a th:href="@{/ui/cacambas}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
 
-  <script>
-    // Bootstrap client-side validation
-    (() => {
-       'use strict';
-       const forms = document.querySelectorAll('.needs-validation');
-       Array.from(forms).forEach(form => {
-         form.addEventListener('submit', event => {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-         }, false);
-       });
-    })();
-  </script>
+        <!-- Mensagens de Feedback -->
+        <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span th:text="${erro}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Formulário -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <i class="bi bi-pencil-square"></i>
+                <span th:with="novo=${cacamba.id == null}">
+                    <span th:if="${novo}">Dados da Nova Caçamba</span>
+                    <span th:unless="${novo}">Dados da Caçamba</span>
+                </span>
+            </div>
+            <div class="card-body">
+                <form th:object="${cacamba}" th:action="@{/ui/cacambas/salvar}" method="post" class="needs-validation" novalidate>
+                    <input type="hidden" th:field="*{id}">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="codigo" class="form-label">
+                                <i class="bi bi-hash"></i> Código *
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="codigo" 
+                                   th:field="*{codigo}" 
+                                   title="Código único para identificar a caçamba"
+                                   required 
+                                   th:readonly="${cacamba.status != null and cacamba.status.name() == 'ALUGADA'}"
+                                   th:class="${cacamba.status != null and cacamba.status.name() == 'ALUGADA' ? 'form-control-plaintext' : 'form-control'}">
+                            <div class="invalid-feedback">
+                                Por favor, informe o código da caçamba.
+                            </div>
+                            <div th:if="${cacamba.status != null and cacamba.status.name() == 'ALUGADA'}" class="form-text text-warning">
+                                <i class="bi bi-exclamation-triangle"></i> Não é possível alterar o código de uma caçamba alugada.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="capacidadeM3" class="form-label">
+                                <i class="bi bi-arrows-expand"></i> Capacidade (m³) *
+                            </label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="capacidadeM3" 
+                                   th:field="*{capacidadeM3}" 
+                                   title="Capacidade em metros cúbicos"
+                                   min="1" 
+                                   max="20" 
+                                   required>
+                            <div class="invalid-feedback">
+                                Por favor, informe a capacidade da caçamba (1-20 m³).
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="status" class="form-label">
+                                <i class="bi bi-info-circle"></i> Status *
+                            </label>
+                            <select class="form-select" 
+                                    id="status" 
+                                    th:field="*{status}" 
+                                    title="Status atual da caçamba"
+                                    th:disabled="${cacamba.status != null and cacamba.status.name() == 'ALUGADA'}"
+                                    required>
+                                <option value="">Selecione o status</option>
+                                <option value="DISPONIVEL">Disponível</option>
+                                <option value="ALUGADA">Alugada</option>
+                                <option value="MANUTENCAO">Manutenção</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Por favor, selecione o status da caçamba.
+                            </div>
+                            <div th:if="${cacamba.status != null and cacamba.status.name() == 'ALUGADA'}" class="form-text text-warning">
+                                <i class="bi bi-exclamation-triangle"></i> Não é possível alterar o status de uma caçamba alugada.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a th:href="@{/ui/cacambas}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-loading">
+                            <i class="bi bi-check-circle"></i>
+                            <span th:with="novo=${cacamba.id == null}">
+                                <span th:if="${novo}">Cadastrar</span>
+                                <span th:unless="${novo}">Atualizar</span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/app.js}"></script>
 </body>
 </html>

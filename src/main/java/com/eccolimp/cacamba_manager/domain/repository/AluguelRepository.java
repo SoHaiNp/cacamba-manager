@@ -32,8 +32,11 @@ public interface AluguelRepository extends JpaRepository<Aluguel, Long> {
         @Param("dataFim") LocalDate dataFim
     );
     
-    @Query("SELECT a FROM Aluguel a WHERE a.status = 'ATIVO' AND a.dataFim <= :dataLimite")
-    List<Aluguel> findVencendoEm(@Param("dataLimite") LocalDate dataLimite);
+    @Query("SELECT a FROM Aluguel a WHERE a.status = 'ATIVO' AND a.dataFim <= :dataLimite AND a.dataFim >= :dataInicio")
+    List<Aluguel> findVencendoEm(@Param("dataLimite") LocalDate dataLimite, @Param("dataInicio") LocalDate dataInicio);
+    
+    @Query("SELECT a FROM Aluguel a WHERE a.status = 'ATIVO' AND a.dataFim = :data")
+    List<Aluguel> findVencendoNaData(@Param("data") LocalDate data);
     
     @Query("SELECT COUNT(a) FROM Aluguel a WHERE a.status = 'ATIVO'")
     long countAtivos();

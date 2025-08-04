@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.eccolimp.cacamba_manager.domain.service.CacambaService;
 import com.eccolimp.cacamba_manager.dto.CacambaDTO;
+import com.eccolimp.cacamba_manager.domain.model.StatusCacamba;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,11 +31,11 @@ public class CacambaPageController {
 
     @GetMapping("/novo")
     public String novo(Model model) {
-        model.addAttribute("cacamba", new CacambaDTO(null, "", null, null));
+        model.addAttribute("cacamba", new CacambaDTO(null, "", null, StatusCacamba.DISPONIVEL));
         return "cacamba/form";
     }
 
-    @PostMapping
+    @PostMapping("/salvar")
     public String salvar(CacambaDTO cacamba, RedirectAttributes redirectAttributes) {
         try {
             service.criar(cacamba);
