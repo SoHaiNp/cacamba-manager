@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificação de Vencimento</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #265988;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #265988;
+            margin-bottom: 10px;
+        }
+        .urgency {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #265988;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .details {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #265988;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .contact-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🚛 Gerenciador de Caçambas</div>
+            <p>Notificação de Vencimento</p>
+        </div>
+
+        <div class="urgency" th:text="${urgencia}">
+            URGENTE
+        </div>
+
+        <p>Olá <strong th:text="${cliente.nome}">Cliente</strong>,</p>
+
+        <p>Este é um lembrete importante sobre seu aluguel de caçamba:</p>
+
+        <div class="info-box">
+            <strong>Seu aluguel vence em <span th:text="${diasRestantes}">0</span> dia(s)!</strong><br>
+            Data de vencimento: <strong th:text="${dataVencimento}">01/01/2024</strong>
+        </div>
+
+        <div class="details">
+            <h3>Detalhes do Aluguel:</h3>
+            
+            <div class="detail-row">
+                <span class="detail-label">Cliente:</span>
+                <span th:text="${cliente.nome}">Nome do Cliente</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Caçamba:</span>
+                <span th:text="${cacamba.codigo}">CÓDIGO</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Capacidade:</span>
+                <span th:text="${cacamba.capacidadeM3} + ' m³'">5 m³</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Endereço:</span>
+                <span th:text="${aluguel.endereco}">Endereço</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Data de Início:</span>
+                <span th:text="${#temporals.format(aluguel.dataInicio, 'dd/MM/yyyy')}">01/01/2024</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Data de Vencimento:</span>
+                <span th:text="${dataVencimento}">01/01/2024</span>
+            </div>
+        </div>
+
+        <div class="contact-info">
+            <h4>📞 Precisa de ajuda?</h4>
+            <p>Entre em contato conosco para renovar seu aluguel ou esclarecer dúvidas:</p>
+            <p><strong>Email:</strong> contato@empresa.com</p>
+            <p><strong>Telefone:</strong> (11) 9999-9999</p>
+            <p><strong>WhatsApp:</strong> (11) 99999-9999</p>
+        </div>
+
+        <p><strong>Atenção:</strong> Após o vencimento, podem ser aplicadas multas por atraso na devolução da caçamba.</p>
+
+        <div class="footer">
+            <p>Este é um email automático do sistema de gerenciamento de caçambas.</p>
+            <p>Para cancelar as notificações, entre em contato conosco.</p>
+            <p>&copy; 2024 Gerenciador de Caçambas. Todos os direitos reservados.</p>
+        </div>
+    </div>
+</body>
+</html> 
