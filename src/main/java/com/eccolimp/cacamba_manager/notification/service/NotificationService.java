@@ -1,5 +1,6 @@
 package com.eccolimp.cacamba_manager.notification.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,9 @@ public class NotificationService {
     private final EmailService emailService;
     private final AluguelService aluguelService;
     private final AluguelRepository aluguelRepository;
+
+    @Value("${app.notification.email.report-to}")
+    private String reportToEmail;
 
     /**
      * Envia notificações de vencimento automaticamente
@@ -89,8 +93,8 @@ public class NotificationService {
         
         try {
             // Aqui você pode implementar a lógica para buscar dados do relatório
-            // e enviar para um email específico (ex: gerente@empresa.com)
-            String emailDestino = "minhacacambaon@gmail.com"; // Configurável
+            // e enviar para um email configurado
+            String emailDestino = reportToEmail;
             
             // Dados do relatório (implementar conforme necessário)
             Map<String, Object> dadosRelatorio = gerarDadosRelatorioSemanal();
