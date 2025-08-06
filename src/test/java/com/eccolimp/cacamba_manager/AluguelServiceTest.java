@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import com.eccolimp.cacamba_manager.domain.model.Cacamba;
 import com.eccolimp.cacamba_manager.domain.model.Cliente;
@@ -23,6 +24,7 @@ import jakarta.transaction.Transactional;
 
 @SpringBootTest
 @Transactional
+@Import(TestConfig.class)
 public class AluguelServiceTest {
 
     @Autowired AluguelService service;

@@ -89,9 +89,9 @@ app.notification.email.from-name=Nome da Empresa
 ```
 
 ### **Configurar Email de Destino do Relatório**
-Edite o arquivo `NotificationService.java`:
-```java
-String emailDestino = "gerente@empresa.com"; // Altere aqui
+Defina o email que receberá o relatório semanal:
+```properties
+app.notification.email.report-to=gerente@empresa.com
 ```
 
 ## 📧 Tipos de Email

@@ -24,14 +24,9 @@ public class NotificationController {
      */
     @PostMapping("/test")
     public ResponseEntity<String> testarNotificacao(@RequestParam String email) {
-        try {
-            log.info("Testando envio de notificação para: {}", email);
-            notificationService.testarNotificacao(email);
-            return ResponseEntity.ok("Email de teste enviado com sucesso para: " + email);
-        } catch (Exception e) {
-            log.error("Erro ao enviar email de teste", e);
-            return ResponseEntity.badRequest().body("Erro ao enviar email: " + e.getMessage());
-        }
+        log.info("Testando envio de notificação para: {}", email);
+        notificationService.testarNotificacao(email);
+        return ResponseEntity.ok("Email de teste enviado com sucesso para: " + email);
     }
 
     /**
@@ -39,14 +34,9 @@ public class NotificationController {
      */
     @PostMapping("/vencimento/forcar")
     public ResponseEntity<String> forcarNotificacoesVencimento() {
-        try {
-            log.info("Forçando envio de notificações de vencimento");
-            notificationService.enviarNotificacoesVencimento();
-            return ResponseEntity.ok("Notificações de vencimento enviadas com sucesso");
-        } catch (Exception e) {
-            log.error("Erro ao enviar notificações de vencimento", e);
-            return ResponseEntity.badRequest().body("Erro ao enviar notificações: " + e.getMessage());
-        }
+        log.info("Forçando envio de notificações de vencimento");
+        notificationService.enviarNotificacoesVencimento();
+        return ResponseEntity.ok("Notificações de vencimento enviadas com sucesso");
     }
 
     /**
@@ -54,13 +44,8 @@ public class NotificationController {
      */
     @PostMapping("/relatorio/forcar")
     public ResponseEntity<String> forcarRelatorioSemanal() {
-        try {
-            log.info("Forçando envio de relatório semanal");
-            notificationService.enviarRelatorioSemanal();
-            return ResponseEntity.ok("Relatório semanal enviado com sucesso");
-        } catch (Exception e) {
-            log.error("Erro ao enviar relatório semanal", e);
-            return ResponseEntity.badRequest().body("Erro ao enviar relatório: " + e.getMessage());
-        }
+        log.info("Forçando envio de relatório semanal");
+        notificationService.enviarRelatorioSemanal();
+        return ResponseEntity.ok("Relatório semanal enviado com sucesso");
     }
-} 
+}
