@@ -10,6 +10,8 @@ import org.thymeleaf.context.Context;
 import com.eccolimp.cacamba_manager.domain.model.Aluguel;
 import com.eccolimp.cacamba_manager.domain.model.Cliente;
 
+import org.apache.commons.validator.routines.EmailValidator;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+    private final EmailValidator emailValidator = EmailValidator.getInstance();
 
     @Value("${app.notification.email.enabled:true}")
     private boolean emailEnabled;
@@ -48,7 +51,7 @@ public class EmailService {
             Cliente cliente = aluguel.getCliente();
             String to = cliente.getContato(); // Assumindo que o contato é o email
             
-            if (!isValidEmail(to)) {
+            if (!emailValidator.isValid(to)) {
                 log.warn("Email inválido para cliente {}: {}", cliente.getNome(), to);
                 return;
             }
@@ -77,7 +80,7 @@ public class EmailService {
             Cliente cliente = aluguel.getCliente();
             String to = cliente.getContato();
             
-            if (!isValidEmail(to)) {
+            if (!emailValidator.isValid(to)) {
                 log.warn("Email inválido para cliente {}: {}", cliente.getNome(), to);
                 return;
             }
@@ -170,7 +173,4 @@ public class EmailService {
         return templateEngine.process("email/relatorio-semanal", context);
     }
 
-    private boolean isValidEmail(String email) {
-        return email != null && email.contains("@") && email.contains(".");
-    }
-} 
+}
