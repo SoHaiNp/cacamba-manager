@@ -5,11 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
+import com.eccolimp.cacamba_manager.CacambaManagerApplication;
 import com.eccolimp.cacamba_manager.domain.model.Cliente;
 import com.eccolimp.cacamba_manager.domain.repository.ClienteRepository;
 
 @SpringBootTest
+@Import(com.eccolimp.cacamba_manager.TestConfig.class)
 public class RepositorySmokeTest {
 
     @Autowired ClienteRepository clienteRepository;
