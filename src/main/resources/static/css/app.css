@@ -74,6 +74,11 @@ body {
     color: #1e4a6f !important;
 }
 
+/* Forçar botão de logout no canto direito */
+.navbar-nav.ms-auto {
+    margin-left: auto !important;
+}
+
 /* Cards customizados */
 .card {
     border: 1px solid #dee2e6;
