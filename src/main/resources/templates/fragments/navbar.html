@@ -1,4 +1,6 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm" xmlns:th="http://www.thymeleaf.org">
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm" 
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <div class="container">
         <a class="navbar-brand" th:href="@{/ui}">
             <i class="bi bi-truck"></i>
@@ -11,12 +13,6 @@
         
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/ui}">
-                        <i class="bi bi-house-door"></i>
-                        Dashboard
-                    </a>
-                </li>
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/ui/cacambas}">
                         <i class="bi bi-box"></i>
@@ -37,18 +33,17 @@
                 </li>
             </ul>
             
+            <!-- Botão de logout - sempre visível no canto direito -->
             <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-gear"></i>
-                        Configurações
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-bell"></i> Notificações</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-text"></i> Relatórios</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-question-circle"></i> Ajuda</a></li>
-                    </ul>
+                <li class="nav-item">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" 
+                                class="btn btn-outline-danger btn-sm d-flex align-items-center"
+                                title="Sair do sistema">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="d-none d-lg-inline ms-1">Sair</span>
+                        </button>
+                    </form>
                 </li>
             </ul>
         </div>
