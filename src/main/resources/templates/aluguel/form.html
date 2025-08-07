@@ -110,11 +110,44 @@
                                    th:field="*{dias}" 
                                    title="Quantidade de dias para o aluguel"
                                    min="1" 
-                                   max="365" 
+                                   max="10" 
                                    required>
                             <div class="invalid-feedback">
-                                Por favor, informe a quantidade de dias (1-365).
+                                Por favor, informe a quantidade de dias (1-10).
                             </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="dataInicio" class="form-label">
+                                <i class="bi bi-calendar-event"></i> Data de Início *
+                            </label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="dataInicio" 
+                                   th:field="*{dataInicio}" 
+                                   title="Data de início do aluguel"
+                                   required>
+                            <div class="invalid-feedback">
+                                Por favor, informe a data de início.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-calendar-check"></i> Data de Fim (Calculada)
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="dataFimPreview" 
+                                   readonly 
+                                   placeholder="Será calculada automaticamente">
+                            <small class="form-text text-muted">
+                                <i class="bi bi-info-circle"></i> 
+                                Data calculada automaticamente. O dia de início conta como o primeiro dia do aluguel.
+                                <br>Exemplo: Início 04/08 + 3 dias = Fim 06/08 (período: 04/08, 05/08, 06/08)
+                            </small>
                         </div>
                     </div>
                     
@@ -133,5 +166,50 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/app.js}"></script>
+    
+    <script>
+        // Função para calcular a data de fim automaticamente
+        function calcularDataFim() {
+            const dataInicio = document.getElementById('dataInicio').value;
+            const dias = document.getElementById('dias').value;
+            const dataFimPreview = document.getElementById('dataFimPreview');
+            
+            if (dataInicio && dias && dias > 0) {
+                // Converter data de string YYYY-MM-DD para partes
+                const [ano, mes, dia] = dataInicio.split('-').map(Number);
+                
+                // Calcular nova data: dataInicio + (dias - 1)
+                const diasInt = parseInt(dias);
+                const diasParaAdicionar = diasInt - 1; // Subtrair 1 porque o dia de início conta como primeiro dia
+                
+                // Criar nova data usando Date constructor
+                const dataFim = new Date(ano, mes - 1, dia + diasParaAdicionar);
+                
+                // Formatar para exibição (DD/MM/YYYY)
+                const diaFim = String(dataFim.getDate()).padStart(2, '0');
+                const mesFim = String(dataFim.getMonth() + 1).padStart(2, '0');
+                const anoFim = dataFim.getFullYear();
+                
+                const dataFormatada = `${diaFim}/${mesFim}/${anoFim}`;
+                dataFimPreview.value = dataFormatada;
+            } else {
+                dataFimPreview.value = '';
+            }
+        }
+        
+        // Adicionar event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataInicioInput = document.getElementById('dataInicio');
+            const diasInput = document.getElementById('dias');
+            
+            if (dataInicioInput && diasInput) {
+                dataInicioInput.addEventListener('change', calcularDataFim);
+                diasInput.addEventListener('input', calcularDataFim);
+                
+                // Calcular inicialmente se já houver valores
+                calcularDataFim();
+            }
+        });
+    </script>
 </body>
 </html> 

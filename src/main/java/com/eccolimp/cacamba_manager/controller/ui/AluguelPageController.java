@@ -17,6 +17,8 @@ import com.eccolimp.cacamba_manager.dto.NovoAluguelRequest;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
+
 @Controller
 @RequestMapping("ui/alugueis")
 @RequiredArgsConstructor
@@ -46,7 +48,7 @@ public class AluguelPageController {
 
     @GetMapping("/novo")
     public String novo(Model model) {
-        model.addAttribute("novoAluguel", new NovoAluguelRequest(null, null, null, 0));
+        model.addAttribute("novoAluguel", new NovoAluguelRequest(null, null, null, LocalDate.now(), 0));
         model.addAttribute("clientes", clienteService.listarTodos());
         model.addAttribute("cacambas", cacambaService.listarTodas().stream()
                 .filter(c -> c.status().name().equals("DISPONIVEL"))

@@ -49,15 +49,29 @@ public class AluguelService {
             throw new BusinessException("Caçamba indisponível");
         }
 
-        LocalDate inicio = LocalDate.now();
-        LocalDate fim = inicio.plusDays(request.dias());
+        // Validar se a caçamba está disponível no período solicitado
+        LocalDate dataInicio = request.dataInicio();
+        LocalDate dataFim = dataInicio.plusDays(request.dias() - 1); // -1 porque o dia de início conta como primeiro dia
+        
+        // Verificar se existe algum aluguel ativo para esta caçamba no período
+        boolean caçambaDisponivelNoPeriodo = aluguelRepository
+            .findByCacambaAndStatusAndPeriodo(
+                cacamba, 
+                StatusAluguel.ATIVO, 
+                dataInicio, 
+                dataFim
+            ).isEmpty();
+        
+        if (!caçambaDisponivelNoPeriodo) {
+            throw new BusinessException("Caçamba não está disponível no período solicitado");
+        }
 
         Aluguel aluguel = new Aluguel();
         aluguel.setCliente(cliente);
         aluguel.setCacamba(cacamba);
         aluguel.setEndereco(request.endereco());
-        aluguel.setDataInicio(inicio);
-        aluguel.setDataFim(fim);
+        aluguel.setDataInicio(dataInicio);
+        aluguel.setDataFim(dataFim);
         aluguel.setStatus(StatusAluguel.ATIVO);
 
         cacamba.setStatus(StatusCacamba.ALUGADA);
@@ -130,8 +144,9 @@ public class AluguelService {
         AluguelDetalhadoDTO dto = aluguelMapper.toDetalhadoDto(aluguel);
         
         // Calcular dias restantes
-        long diasRestantes = LocalDate.now().isAfter(aluguel.getDataFim()) ? 0 : 
-                           java.time.temporal.ChronoUnit.DAYS.between(LocalDate.now(), aluguel.getDataFim());
+        LocalDate hoje = LocalDate.now();
+        long diasRestantes = hoje.isAfter(aluguel.getDataFim()) ? 0 : 
+                           java.time.temporal.ChronoUnit.DAYS.between(hoje, aluguel.getDataFim());
         
         return new AluguelDetalhadoDTO(
             dto.id(), dto.clienteNome(), dto.clienteContato(), dto.cacambaCodigo(), 
