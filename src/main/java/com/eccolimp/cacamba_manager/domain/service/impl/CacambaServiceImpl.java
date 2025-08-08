@@ -1,9 +1,12 @@
 package com.eccolimp.cacamba_manager.domain.service.impl;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,9 @@ import com.eccolimp.cacamba_manager.domain.service.CacambaService;
 import com.eccolimp.cacamba_manager.domain.service.exception.BusinessException;
 import com.eccolimp.cacamba_manager.dto.CacambaDTO;
 import com.eccolimp.cacamba_manager.mapper.CacambaMapper;
+import com.eccolimp.cacamba_manager.domain.model.Cacamba;
+import com.eccolimp.cacamba_manager.domain.model.Aluguel;
+import com.eccolimp.cacamba_manager.domain.model.StatusAluguel;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,32 +83,32 @@ public class CacambaServiceImpl implements CacambaService {
 
     /* ---------- Leituras ---------- */
 
-    @Transactional(readOnly = true)
     @Override
     public List<CacambaDTO> listarTodas() {
-        return repo.findAll().stream().map(mapper::toDto).toList();
+        List<Cacamba> cacambas = repo.findAll();
+        return cacambas.stream()
+                      .map(mapper::toDto)
+                      .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
     @Override
     public Page<CacambaDTO> listar(int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by("codigo"));
-        return repo.findAll(pageable).map(mapper::toDto);
+        Page<Cacamba> cacambas = repo.findAll(pageable);
+        return cacambas.map(mapper::toDto);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public CacambaDTO buscarPorId(Long id) {
-        return repo.findById(id).map(mapper::toDto)
-                   .orElseThrow(() -> new EntityNotFoundException("Caçamba não encontrada"));
+        Cacamba cacamba = repo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Caçamba não encontrada"));
+        return mapper.toDto(cacamba);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public boolean estaDisponivel(Long id) {
         return repo.findById(id)
                    .map(c -> c.getStatus() == StatusCacamba.DISPONIVEL)
                    .orElse(false);
     }
-    
 }

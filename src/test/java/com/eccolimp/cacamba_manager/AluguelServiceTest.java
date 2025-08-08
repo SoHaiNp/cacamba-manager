@@ -124,7 +124,7 @@ public class AluguelServiceTest {
             service.registrar(new NovoAluguelRequest(cliente2Salvo.getId(), cacambaSalva.getId(), 
                 "Rua Y, 456", dataInicio2, 3))
         ).isInstanceOf(BusinessException.class)
-         .hasMessage("Caçamba não está disponível no período solicitado");
+         .hasMessage("Caçamba indisponível");
     }
 
     @Test
@@ -200,5 +200,37 @@ public class AluguelServiceTest {
         hoje = LocalDate.of(2024, 8, 9); // Simular que hoje é 09/08
         diasRestantes = java.time.temporal.ChronoUnit.DAYS.between(hoje, dto.dataFim());
         assertThat(diasRestantes).isEqualTo(0); // Deveria ser 0 dias (vencimento)
+    }
+
+    @Test
+    void deveCalcularDiasAtrasoCorretamente() {
+        Cliente cli = new Cliente();
+        cli.setNome("Fulano");
+        cli.setContato("(11)9999-9999");
+        cli = clienteRepo.save(cli);
+        
+        Cacamba cac = new Cacamba();
+        cac.setCodigo("CX-107");
+        cac.setCapacidadeM3(5);
+        cac.setStatus(StatusCacamba.DISPONIVEL);
+        cac = cacambaRepo.save(cac);
+
+        // Criar aluguel vencido: início 01/08, duração 3 dias, fim 03/08
+        LocalDate dataInicio = LocalDate.of(2024, 8, 1); // 01/08/2024
+        AluguelDTO dto = service.registrar(new NovoAluguelRequest(cli.getId(), cac.getId(),
+                                           "Rua X, 123", dataInicio, 3));
+
+        // Verificar que a data de fim está correta
+        assertThat(dto.dataFim()).isEqualTo(LocalDate.of(2024, 8, 3)); // 03/08/2024
+        
+        // Simular que hoje é 05/08 (2 dias após o vencimento)
+        LocalDate hoje = LocalDate.of(2024, 8, 5);
+        long diasAtraso = java.time.temporal.ChronoUnit.DAYS.between(dto.dataFim(), hoje);
+        assertThat(diasAtraso).isEqualTo(2); // Deveria ser 2 dias de atraso
+        
+        // Simular que hoje é 10/08 (7 dias após o vencimento)
+        hoje = LocalDate.of(2024, 8, 10);
+        diasAtraso = java.time.temporal.ChronoUnit.DAYS.between(dto.dataFim(), hoje);
+        assertThat(diasAtraso).isEqualTo(7); // Deveria ser 7 dias de atraso
     }
 }

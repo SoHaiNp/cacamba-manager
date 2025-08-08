@@ -14,5 +14,6 @@ public record AluguelDetalhadoDTO(
     LocalDate dataInicio,
     LocalDate dataFim,
     StatusAluguel status,
-    Integer diasRestantes
+    Integer diasRestantes,
+    Integer diasAtraso
 ) {} 

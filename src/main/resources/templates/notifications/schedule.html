@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Notificação</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .card { max-width: 720px; margin: 0 auto; }
+    </style>
+    </head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<div class="container py-4">
+    <h2 class="mb-3"><i class="bi bi-calendar-event"></i> Agendar Envio de Notificações</h2>
+
+    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> <span th:text="${mensagem}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <i class="bi bi-funnel"></i> Parâmetros
+        </div>
+        <div class="card-body">
+            <form method="post" th:action="@{/ui/notifications/agendar}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Data e Hora</label>
+                        <input type="datetime-local" class="form-control" name="v" required>
+                        <div class="form-text">Ex.: hoje às 22:30</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fuso horário</label>
+                        <input type="text" class="form-control" name="zone" th:value="${defaultZone}" required>
+                        <div class="form-text">Ex.: America/Sao_Paulo</div>
+                    </div>
+                    <div class="col-12 d-flex justify-content-end gap-2">
+                        <a th:href="@{/ui/alugueis}" class="btn btn-outline-secondary">Voltar</a>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-send"></i> Agendar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

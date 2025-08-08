@@ -25,6 +25,86 @@
             </a>
         </div>
 
+        <!-- Filtros -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-funnel"></i> Filtros</span>
+                <button class="btn btn-sm btn-outline-secondary" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#filtrosCollapse"
+                        aria-expanded="true" aria-controls="filtrosCollapse">
+                    <i class="bi bi-chevron-up"></i> Minimizar
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="collapse show" id="filtrosCollapse">
+                    <div class="p-3">
+                        <form class="row g-3" method="get" th:action="@{/ui/alugueis}">
+                    <div class="col-md-2">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status">
+                            <option th:selected="${param.status == null}" value="">Todos</option>
+                            <option value="ATIVO" th:selected="${param.status == 'ATIVO'}">Ativo</option>
+                            <option value="FINALIZADO" th:selected="${param.status == 'FINALIZADO'}">Finalizado</option>
+                            <option value="CANCELADO" th:selected="${param.status == 'CANCELADO'}">Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Cliente</label>
+                        <input type="text" class="form-control" name="cliente" th:value="${param.cliente}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Caçamba</label>
+                        <input type="text" class="form-control" name="cacamba" th:value="${param.cacamba}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Início De</label>
+                        <input type="date" class="form-control" name="dataInicioDe" th:value="${param.dataInicioDe}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Início Até</label>
+                        <input type="date" class="form-control" name="dataInicioAte" th:value="${param.dataInicioAte}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Fim De</label>
+                        <input type="date" class="form-control" name="dataFimDe" th:value="${param.dataFimDe}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Fim Até</label>
+                        <input type="date" class="form-control" name="dataFimAte" th:value="${param.dataFimAte}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Situação</label>
+                        <select class="form-select" name="situacao">
+                            <option value="" th:selected="${param.situacao == null}">Todas</option>
+                            <option value="VENCE_HOJE" th:selected="${param.situacao == 'VENCE_HOJE'}">Vence hoje</option>
+                            <option value="VENCIDOS" th:selected="${param.situacao == 'VENCIDOS'}">Vencidos</option>
+                            <option value="PROXIMOS_7_DIAS" th:selected="${param.situacao == 'PROXIMOS_7_DIAS'}">Próximos 7 dias</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="comAtraso" value="true" th:checked="${param.comAtraso != null}">
+                            <label class="form-check-label">Com atraso</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Texto livre</label>
+                        <input type="text" class="form-control" name="texto" placeholder="cliente, caçamba, endereço" th:value="${param.texto}">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-filter"></i> Aplicar
+                        </button>
+                        <a th:href="@{/ui/alugueis}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Limpar
+                        </a>
+                    </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Mensagens de Feedback -->
         <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="bi bi-check-circle"></i>
@@ -67,12 +147,26 @@
                                     <div>
                                         <small class="text-muted">Até: <span th:text="${#temporals.format(a.dataFim, 'dd/MM/yyyy')}">07/01/2024</span></small>
                                     </div>
-                                    <span th:if="${a.diasRestantes != null and a.diasRestantes <= 2}" 
-                                          class="badge bg-warning" 
+                                    <span th:if="${a.status.name() == 'ATIVO' and a.diasRestantes != null and a.diasRestantes > 2}"
+                                          class="badge bg-success"
+                                          th:text="${a.diasRestantes} + ' dias restantes'">
+                                        5 dias restantes
+                                    </span>
+                                    <span th:if="${a.status.name() == 'ATIVO' and a.diasRestantes != null and a.diasRestantes <= 2 and a.diasRestantes > 0}"
+                                          class="badge bg-warning"
                                           th:text="${a.diasRestantes} + ' dias restantes'">
                                         2 dias restantes
                                     </span>
+                                    <span th:if="${a.status.name() == 'ATIVO' and a.diasRestantes == 0}"
+                                          class="badge bg-danger">
+                                        <i class="bi bi-exclamation-triangle"></i> Vence hoje!
+                                    </span>
+                                    <span th:if="${a.status.name() == 'ATIVO' and a.diasRestantes < 0}"
+                                          class="badge bg-danger">
+                                        <i class="bi bi-exclamation-triangle"></i> Vencido há <span th:text="${-a.diasRestantes}">2</span> dias
+                                    </span>
                                 </td>
+                                
                                 <td>
                                     <span th:if="${a.status.name() == 'ATIVO'}" class="badge bg-success">
                                         <i class="bi bi-play-circle"></i> Ativo
@@ -108,6 +202,16 @@
                                                 data-bs-toggle="modal" 
                                                 th:data-bs-target="'#cancelarModal' + ${a.id}">
                                             <i class="bi bi-x-circle"></i>
+                                        </button>
+
+                                        <!-- Ícone de lixeira para itens CANCELADOS ou FINALIZADOS -->
+                                        <button th:if="${a.status.name() == 'CANCELADO' or a.status.name() == 'FINALIZADO'}"
+                                                type="button"
+                                                class="btn btn-sm btn-outline-secondary"
+                                                title="Arquivar (remover da lista)"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="'#arquivarModal' + ${a.id}">
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
 
@@ -154,6 +258,30 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- Modal de confirmação de arquivamento -->
+                                    <div class="modal fade" th:id="'arquivarModal' + ${a.id}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Arquivar Aluguel</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Tem certeza que deseja arquivar este aluguel de <strong th:text="${a.clienteNome}"></strong>?</p>
+                                                    <p class="text-muted">O item será removido desta lista e guardado em um histórico.</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                    <form th:action="@{/ui/alugueis/{id}/arquivar(id=${a.id})}" method="post" style="display: inline;">
+                                                        <button type="submit" class="btn btn-outline-secondary">
+                                                            <i class="bi bi-trash"></i> Arquivar
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(alugueis)}">
@@ -174,16 +302,16 @@
                     <nav>
                         <ul class="pagination">
                             <li class="page-item" th:classappend="${alugueis.first} ? 'disabled'">
-                                <a class="page-link" th:href="@{/ui/alugueis(page=${alugueis.number - 1})}">
+                                <a class="page-link" th:href="@{/ui/alugueis(page=${alugueis.number - 1}, status=${param.status}, cliente=${param.cliente}, cacamba=${param.cacamba}, dataInicioDe=${param.dataInicioDe}, dataInicioAte=${param.dataInicioAte}, dataFimDe=${param.dataFimDe}, dataFimAte=${param.dataFimAte}, situacao=${param.situacao}, comAtraso=${param.comAtraso}, texto=${param.texto})}">
                                     <i class="bi bi-chevron-left"></i>
                                 </a>
                             </li>
                             <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, alugueis.totalPages - 1)}"
                                 th:classappend="${pageNum == alugueis.number} ? 'active'">
-                                <a class="page-link" th:href="@{/ui/alugueis(page=${pageNum})}" th:text="${pageNum + 1}">1</a>
+                                <a class="page-link" th:href="@{/ui/alugueis(page=${pageNum}, status=${param.status}, cliente=${param.cliente}, cacamba=${param.cacamba}, dataInicioDe=${param.dataInicioDe}, dataInicioAte=${param.dataInicioAte}, dataFimDe=${param.dataFimDe}, dataFimAte=${param.dataFimAte}, situacao=${param.situacao}, comAtraso=${param.comAtraso}, texto=${param.texto})}" th:text="${pageNum + 1}">1</a>
                             </li>
                             <li class="page-item" th:classappend="${alugueis.last} ? 'disabled'">
-                                <a class="page-link" th:href="@{/ui/alugueis(page=${alugueis.number + 1})}">
+                                <a class="page-link" th:href="@{/ui/alugueis(page=${alugueis.number + 1}, status=${param.status}, cliente=${param.cliente}, cacamba=${param.cacamba}, dataInicioDe=${param.dataInicioDe}, dataInicioAte=${param.dataInicioAte}, dataFimDe=${param.dataFimDe}, dataFimAte=${param.dataFimAte}, situacao=${param.situacao}, comAtraso=${param.comAtraso}, texto=${param.texto})}">
                                     <i class="bi bi-chevron-right"></i>
                                 </a>
                             </li>
