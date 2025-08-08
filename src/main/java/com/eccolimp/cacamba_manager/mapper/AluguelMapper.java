@@ -12,6 +12,7 @@ public interface AluguelMapper {
     
     @Mapping(target = "clienteId", source = "cliente.id")
     @Mapping(target = "cacambaId", source = "cacamba.id")
+    @Mapping(target = "diasAtraso", ignore = true)
     AluguelDTO toDto(Aluguel entity);
     
     @Mapping(target = "cliente", ignore = true)
@@ -23,5 +24,6 @@ public interface AluguelMapper {
     @Mapping(target = "cacambaCodigo", source = "cacamba.codigo")
     @Mapping(target = "cacambaCapacidade", source = "cacamba.capacidadeM3")
     @Mapping(target = "diasRestantes", ignore = true)
+    @Mapping(target = "diasAtraso", ignore = true)
     AluguelDetalhadoDTO toDetalhadoDto(Aluguel entity);
 }

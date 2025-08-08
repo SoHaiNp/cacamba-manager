@@ -9,7 +9,6 @@ import com.eccolimp.cacamba_manager.domain.model.Aluguel;
 import com.eccolimp.cacamba_manager.domain.repository.AluguelRepository;
 import com.eccolimp.cacamba_manager.domain.service.AluguelService;
 import com.eccolimp.cacamba_manager.dto.AlertasVencimentoDTO;
-import com.eccolimp.cacamba_manager.dto.AluguelVencendoDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +31,9 @@ public class NotificationService {
 
     /**
      * Envia notificações de vencimento automaticamente
-     * Executa todos os dias às 8:00 da manhã
+     * Cron e fuso configuráveis por propriedade.
      */
-    @Scheduled(cron = "0 0 8 * * ?") // Todos os dias às 8:00
+    @Scheduled(cron = "${app.notification.cron.vencimentos:0 0 8 * * ?}", zone = "${app.notification.cron.zone:America/Sao_Paulo}")
     @Transactional
     public void enviarNotificacoesVencimento() {
         log.info("Iniciando envio de notificações de vencimento...");
@@ -84,9 +83,9 @@ public class NotificationService {
 
     /**
      * Envia relatório semanal de aluguéis ativos
-     * Executa toda segunda-feira às 9:00
+     * Cron e fuso configuráveis por propriedade.
      */
-    @Scheduled(cron = "0 0 9 ? * MON") // Toda segunda às 9:00
+    @Scheduled(cron = "${app.notification.cron.relatorio:0 0 9 ? * MON}", zone = "${app.notification.cron.zone:America/Sao_Paulo}")
     @Transactional
     public void enviarRelatorioSemanal() {
         log.info("Iniciando envio de relatório semanal...");

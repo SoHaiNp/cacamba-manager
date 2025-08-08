@@ -12,10 +12,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.eccolimp.cacamba_manager.domain.service.AluguelService;
 import com.eccolimp.cacamba_manager.domain.service.CacambaService;
 import com.eccolimp.cacamba_manager.domain.service.ClienteService;
-import com.eccolimp.cacamba_manager.dto.AluguelDTO;
 import com.eccolimp.cacamba_manager.dto.NovoAluguelRequest;
 
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
 
 @Controller
 @RequestMapping("ui/alugueis")
@@ -27,26 +28,39 @@ public class AluguelPageController {
     private final CacambaService cacambaService;
 
     @GetMapping
-    public String list(Model model, @RequestParam(defaultValue = "0") int page) {
-        var alugueisPage = aluguelService.listar(page, 10);
-        var alugueisDetalhados = alugueisPage.getContent().stream()
-                .map(dto -> aluguelService.buscarDetalhadoPorId(dto.id()))
-                .toList();
-        
-        // Criar uma nova página com os dados detalhados
-        var pageDetalhada = new org.springframework.data.domain.PageImpl<>(
-                alugueisDetalhados, 
-                alugueisPage.getPageable(), 
-                alugueisPage.getTotalElements()
-        );
-        
+    public String list(Model model,
+                       @RequestParam(defaultValue = "0") int page,
+                       @RequestParam(required = false) com.eccolimp.cacamba_manager.domain.model.StatusAluguel status,
+                       @RequestParam(required = false) String cliente,
+                       @RequestParam(required = false) String cacamba,
+                       @RequestParam(required = false) java.time.LocalDate dataInicioDe,
+                       @RequestParam(required = false) java.time.LocalDate dataInicioAte,
+                       @RequestParam(required = false) java.time.LocalDate dataFimDe,
+                       @RequestParam(required = false) java.time.LocalDate dataFimAte,
+                       @RequestParam(required = false) com.eccolimp.cacamba_manager.dto.SituacaoVencimento situacao,
+                       @RequestParam(required = false) Boolean comAtraso,
+                       @RequestParam(required = false) String texto) {
+
+        var filtro = new com.eccolimp.cacamba_manager.dto.FiltroAluguel();
+        filtro.setStatus(status);
+        filtro.setClienteNome(cliente);
+        filtro.setCacambaCodigo(cacamba);
+        filtro.setDataInicioDe(dataInicioDe);
+        filtro.setDataInicioAte(dataInicioAte);
+        filtro.setDataFimDe(dataFimDe);
+        filtro.setDataFimAte(dataFimAte);
+        filtro.setSituacao(situacao);
+        filtro.setComAtraso(comAtraso);
+        filtro.setTexto(texto);
+
+        var pageDetalhada = aluguelService.listarFiltrado(filtro, page, 10);
         model.addAttribute("alugueis", pageDetalhada);
         return "aluguel/list";
     }
 
     @GetMapping("/novo")
     public String novo(Model model) {
-        model.addAttribute("novoAluguel", new NovoAluguelRequest(null, null, null, 0));
+        model.addAttribute("novoAluguel", new NovoAluguelRequest(null, null, null, LocalDate.now(), 0));
         model.addAttribute("clientes", clienteService.listarTodos());
         model.addAttribute("cacambas", cacambaService.listarTodas().stream()
                 .filter(c -> c.status().name().equals("DISPONIVEL"))
@@ -89,6 +103,40 @@ public class AluguelPageController {
             redirectAttributes.addFlashAttribute("mensagem", "Aluguel cancelado com sucesso!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("erro", "Erro ao cancelar aluguel: " + e.getMessage());
+        }
+        return "redirect:/ui/alugueis";
+    }
+
+    @PostMapping("/{id}/renovar")
+    public String renovar(@PathVariable Long id,
+                          @RequestParam(value = "diasAdicionais", required = false) Integer diasAdicionais,
+                          @RequestParam(value = "novaDataInicio", required = false) java.time.LocalDate novaDataInicio,
+                          @RequestParam(value = "dias", required = false) Integer dias,
+                          RedirectAttributes redirectAttributes) {
+        try {
+            // Se vierem campos de novaDataInicio e dias, cria novo contrato e finaliza o atual
+            if (novaDataInicio != null && dias != null) {
+                var novo = aluguelService.renovarCriandoNovo(id, novaDataInicio, dias);
+                redirectAttributes.addFlashAttribute("mensagem", "Contrato renovado! Novo contrato criado com sucesso.");
+                return "redirect:/ui/alugueis/" + novo.id();
+            }
+
+            // fallback: renovação simples por dias adicionais (mantém o mesmo registro)
+            aluguelService.renovar(id, diasAdicionais != null ? diasAdicionais : 1);
+            redirectAttributes.addFlashAttribute("mensagem", "Aluguel renovado com sucesso!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("erro", "Erro ao renovar aluguel: " + e.getMessage());
+        }
+        return "redirect:/ui/alugueis/" + id;
+    }
+
+    @PostMapping("/{id}/arquivar")
+    public String arquivar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            aluguelService.arquivar(id);
+            redirectAttributes.addFlashAttribute("mensagem", "Aluguel arquivado e removido da lista!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("erro", "Erro ao arquivar aluguel: " + e.getMessage());
         }
         return "redirect:/ui/alugueis";
     }

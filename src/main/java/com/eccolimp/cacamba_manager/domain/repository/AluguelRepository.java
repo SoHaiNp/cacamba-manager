@@ -6,13 +6,15 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.eccolimp.cacamba_manager.domain.model.Aluguel;
+import com.eccolimp.cacamba_manager.domain.model.Cacamba;
 import com.eccolimp.cacamba_manager.domain.model.StatusAluguel;
 
-public interface AluguelRepository extends JpaRepository<Aluguel, Long> {
+public interface AluguelRepository extends JpaRepository<Aluguel, Long>, JpaSpecificationExecutor<Aluguel> {
     
     @Query("SELECT a FROM Aluguel a WHERE a.dataFim >= :dataLimite")
     List<Aluguel> ativos(@Param("dataLimite") LocalDate dataLimite);
@@ -40,4 +42,25 @@ public interface AluguelRepository extends JpaRepository<Aluguel, Long> {
     
     @Query("SELECT COUNT(a) FROM Aluguel a WHERE a.status = 'ATIVO'")
     long countAtivos();
+    
+    /**
+     * Verifica se existe algum aluguel ativo para uma caçamba em um período específico
+     * Retorna aluguéis que se sobrepõem ao período solicitado
+     */
+    @Query("SELECT a FROM Aluguel a WHERE a.cacamba = :cacamba AND a.status = :status " +
+           "AND ((a.dataInicio <= :dataFim AND a.dataFim >= :dataInicio) OR " +
+           "(a.dataInicio >= :dataInicio AND a.dataInicio <= :dataFim) OR " +
+           "(a.dataFim >= :dataInicio AND a.dataFim <= :dataFim))")
+    List<Aluguel> findByCacambaAndStatusAndPeriodo(
+        @Param("cacamba") Cacamba cacamba,
+        @Param("status") StatusAluguel status,
+        @Param("dataInicio") LocalDate dataInicio,
+        @Param("dataFim") LocalDate dataFim
+    );
+    
+    /**
+     * Busca aluguéis ativos por caçamba
+     */
+    @Query("SELECT a FROM Aluguel a WHERE a.cacamba.id = :cacambaId AND a.status = 'ATIVO'")
+    List<Aluguel> findByCacambaIdAndStatusAtivo(@Param("cacambaId") Long cacambaId);
 }
