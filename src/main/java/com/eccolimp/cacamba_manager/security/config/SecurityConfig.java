@@ -1,6 +1,5 @@
 package com.eccolimp.cacamba_manager.security.config;
 
-import com.eccolimp.cacamba_manager.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
@@ -27,8 +27,9 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomUserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final AdminAuthenticationFailureHandler adminAuthenticationFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -74,6 +75,45 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
+    public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/admin/**")
+            .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/admin/login", "/admin/auth/**").permitAll()
+                .anyRequest().hasRole("ADMIN")
+            )
+            .formLogin(form -> form
+                .loginPage("/admin/login")
+                .loginProcessingUrl("/admin/auth/login")
+                .usernameParameter("login")
+                .passwordParameter("password")
+                .defaultSuccessUrl("/admin", true)
+                .failureHandler(adminAuthenticationFailureHandler)
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/admin/logout")
+                .logoutSuccessUrl("/admin/login?logout=true")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll()
+            )
+            .rememberMe(remember -> remember
+                .userDetailsService(userDetailsService)
+                .tokenValiditySeconds(86400)
+                .key("mySecretKey")
+            )
+            .sessionManagement(session -> session
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false)
+            )
+            .authenticationProvider(authenticationProvider());
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(3)
     public SecurityFilterChain uiFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authz -> authz
@@ -81,9 +121,6 @@ public class SecurityConfig {
                 .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                 .requestMatchers("/login", "/register", "/auth/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll() // Para desenvolvimento
-                
-                // Páginas administrativas - apenas ADMIN
-                .requestMatchers("/ui/admin/**").hasRole("ADMIN")
                 
                 // Páginas gerenciais - ADMIN ou MANAGER
                 .requestMatchers("/ui/usuarios/**").hasAnyRole("ADMIN", "MANAGER")

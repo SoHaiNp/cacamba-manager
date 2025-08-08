@@ -16,8 +16,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, 
                                      HttpServletResponse response, 
                                      Authentication authentication) throws IOException, ServletException {
-        
-        // Redireciona para o dashboard após login bem-sucedido
+        // Redireciona para o dashboard padrão da UI
         response.sendRedirect("/ui");
     }
 } 

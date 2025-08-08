@@ -51,6 +51,66 @@ body {
 
 /* (Dark mode removido) */
 
+/* ============================
+   Auth (Login) minimal layout
+   ============================ */
+.auth-layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    background: var(--surface-2);
+}
+
+.auth-hero {
+    background: linear-gradient(135deg, #0b192e 0%, #123053 100%);
+    color: #fff;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 6vh 6vw;
+}
+
+.auth-hero .brand-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+}
+
+.auth-hero h1 { font-weight: 700; margin: 16px 0 8px; }
+.auth-hero p { opacity: 0.85; max-width: 520px; }
+
+.auth-panel {
+    background: var(--surface-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6vh 4vw;
+    box-shadow: -1px 0 0 var(--border-color);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+}
+
+.auth-card .card { border: none; box-shadow: var(--shadow-md); }
+.auth-card .card-body { padding: 32px; }
+.auth-header { margin-bottom: 18px; }
+.auth-header h3 { margin: 8px 0 2px; font-weight: 700; }
+.auth-subtitle { color: var(--muted-color); }
+
+.auth-actions { margin-top: 12px; }
+
+@media (max-width: 992px) {
+  .auth-layout { grid-template-columns: 1fr; }
+  .auth-hero { display: none; }
+  .auth-panel { padding: 6vh 24px; }
+}
+
 /* Botões customizados */
 .btn {
     border-radius: var(--radius-sm);

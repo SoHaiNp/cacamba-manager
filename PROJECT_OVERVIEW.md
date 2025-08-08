@@ -150,3 +150,54 @@ spring.mail.password=${EMAIL_PASSWORD}
 Seu sistema está **bem estruturado** e **funcional**, com uma base sólida. As principais melhorias são relacionadas a **boas práticas de código**, **segurança** e **observabilidade**. O projeto demonstra conhecimento técnico sólido e está pronto para produção com algumas melhorias pontuais.
 
 **Recomendação:** Foque primeiro nas melhorias de segurança e logging, depois nas otimizações de performance. O sistema já está em um bom nível para uso em produção.
+
+---
+
+## 🔐 Autenticação e Painel Administrativo (estado atual)
+
+- **Cadeias de segurança**
+  - **/admin/**: exige `ROLE_ADMIN`. Página de login em `"/admin/login"`, processamento em `"/admin/auth/login"`, sucesso redireciona para `"/admin"`. Logout em `"/admin/logout"`. CSRF habilitado; remember-me ativo (24h).
+  - **/ui/**: páginas gerais da aplicação. Login em `"/login"`, processamento em `"/auth/login"`, sucesso via `CustomAuthenticationSuccessHandler` para `"/ui"`.
+
+- **Provider de autenticação**
+  - Único `DaoAuthenticationProvider` com `CustomUserDetailsService` (carrega por username ou email) e `PasswordEncoder` BCrypt.
+  - Authorities no formato `ROLE_<ROLE>` baseadas em `User.role`.
+
+- **Bootstrap do primeiro administrador**
+  - `AdminBootstrapRunner` executa no startup. Se não existir nenhum usuário com `ROLE_ADMIN`, cria um admin.
+  - Variáveis de ambiente suportadas: `APP_ADMIN_USERNAME`, `APP_ADMIN_EMAIL`, `APP_ADMIN_PASSWORD`.
+  - Se a senha não for informada, é gerada uma senha temporária forte e registrada uma única vez no log de inicialização.
+  - Migration `V8__remove_seeded_admin.sql` remove seeds antigos para padronizar a criação via bootstrap.
+
+- **Páginas do Painel Admin** (Thymeleaf)
+  - `admin/login.html`, `admin/index.html`, `admin/settings.html`, `admin/import.html`, `admin/users.html`, `admin/reports.html`.
+  - Mensagens de erro são genéricas. O “motivo técnico” foi removido da UI; o detalhe permanece apenas nos logs do servidor.
+
+- **Observabilidade de falhas**
+  - `AdminAuthenticationFailureHandler`: registra tentativas de login malsucedidas do painel (sem vazar detalhes ao usuário).
+
+---
+
+## ✅ Itens implementados para o painel administrativo
+
+- Rota dedicada `"/admin/**"` isolada da UI.
+- Autenticação por banco usando o mesmo provider da aplicação.
+- Bootstrap automático do primeiro admin via variáveis de ambiente.
+- CSRF, remember-me e logout configurados.
+- Seeds antigos neutralizados via Flyway (V8).
+
+---
+
+## 📌 Backlog sugerido (boas práticas de segurança e UX)
+
+- **Troca de senha obrigatória** no primeiro login do admin bootstrapado.
+- **Política de senhas**: tamanho mínimo, complexidade, histórico, expiração opcional.
+- **Proteção contra força bruta**: lockout temporário após N falhas e/ou rate limit por IP.
+- **2FA** no `/admin/**` (TOTP ou e-mail OTP).
+- **Gestão de usuários no painel**: CRUD de usuários e atribuição de roles (ADMIN/MANAGER/USER).
+- **Reset de senha** seguro via token por e-mail.
+- **Endurecimento de cookies**: `Secure`, `HttpOnly`, `SameSite=Strict` em produção; `rememberMe.key` externo (env/secret manager).
+- **Perfis e features de dev**: endpoints de diagnóstico somente em `dev` (já aplicado para `/dev/security/**`).
+- **Desativar `spring.jpa.open-in-view`** em produção para reduzir riscos e consumo no render de views.
+- **Monitoramento**: métricas e contadores de tentativas de login (Micrometer), health checks customizados.
+- **SSO/IdP (opcional)**: suporte a OpenID Connect/OAuth2 com mapeamento de grupos para roles.
