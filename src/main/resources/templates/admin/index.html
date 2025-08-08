@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+<header class="border-bottom mb-4">
+    <div class="container-fluid d-flex align-items-center justify-content-between py-3">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-shield-lock fs-4 text-dark"></i>
+            <h5 class="mb-0">Painel Administrativo</h5>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a th:href="@{/admin/settings}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-gear"></i></a>
+            <form th:action="@{/admin/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i> Sair</button>
+            </form>
+        </div>
+    </div>
+    <div class="bg-light py-2">
+        <div class="container-fluid small text-muted">Somente acesso ADMIN • Área separada do sistema</div>
+    </div>
+    </header>
+
+<main class="container-fluid">
+    <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-upload"></i> Importar dados em massa</h5>
+                    <p class="text-muted mb-3">Clientes e Caçambas via CSV</p>
+                    <a th:href="@{/admin/import}" class="btn btn-primary btn-sm">Abrir</a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-gear"></i> Configurações</h5>
+                    <p class="text-muted mb-3">Horários/Cron, remetente e destinatários</p>
+                    <a th:href="@{/admin/settings}" class="btn btn-primary btn-sm">Abrir</a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-people"></i> Usuários da empresa</h5>
+                    <p class="text-muted mb-3">Criar e remover usuários</p>
+                    <a th:href="@{/admin/users}" class="btn btn-primary btn-sm">Abrir</a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-filetype-csv"></i> Relatórios CSV</h5>
+                    <p class="text-muted mb-3">Campos e filtros preparados</p>
+                    <a th:href="@{/admin/reports}" class="btn btn-outline-primary btn-sm">Abrir</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
