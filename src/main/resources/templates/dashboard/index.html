@@ -7,27 +7,41 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23265988'/%3E%3C/svg%3E">
 </head>
 <body>
     <!-- Navbar -->
     <div th:replace="~{fragments/navbar :: nav}"></div>
 
     <!-- Conteúdo Principal -->
-    <div class="container-fluid">
+    <div class="container-fluid page-container dashboard-page">
         <!-- Header do Dashboard -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
-                <p class="text-muted mb-0">Visão geral do sistema de gerenciamento de caçambas</p>
+        <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-2 dashboard-header">
+            <div class="flex-grow-1">
+                <h2 class="mb-1"><i class="bi bi-speedometer2"></i> Dashboard</h2>
+                <p class="text-muted mb-0">Visão geral e ações rápidas</p>
             </div>
-            <div class="text-end">
-                <small class="text-muted">Última atualização:</small><br>
-                <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}">01/01/2024 12:00</span>
+            <div class="d-flex align-items-center gap-2 flex-nowrap header-actions">
+                <a th:href="@{/ui/alugueis/novo}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    <span class="d-none d-sm-inline">Novo Aluguel</span>
+                    <span class="d-sm-none">Aluguel</span>
+                </a>
+                <a th:href="@{/ui/cacambas/novo}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-box me-1"></i>
+                    <span class="d-none d-sm-inline">Nova Caçamba</span>
+                    <span class="d-sm-none">Caçamba</span>
+                </a>
+                <a th:href="@{/ui/clientes/novo}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-person-plus me-1"></i>
+                    <span class="d-none d-sm-inline">Novo Cliente</span>
+                    <span class="d-sm-none">Cliente</span>
+                </a>
             </div>
         </div>
 
         <!-- Alertas e Notificações -->
-        <div class="row mb-4" th:if="${alertasVencimento.temAlgumAlerta()}">
+        <div class="row mb-4 d-none" th:if="${alertasVencimento.temAlgumAlerta()}">
             <!-- Alerta para aluguéis vencendo HOJE -->
             <div class="col-12 mb-3" th:if="${alertasVencimento.temVencendoHoje()}">
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -72,8 +86,8 @@
         </div>
 
         <!-- Cards de Estatísticas -->
-        <div class="row mb-4">
-            <div class="col-xl-3 col-md-6 mb-3">
+        <div class="row mb-4 g-3 row-cols-xxl-5 row-cols-xl-4 row-cols-md-2 row-cols-1">
+            <div class="col">
                 <div class="card dashboard-card h-100 border-0 shadow-sm">
                     <div class="card-body text-center">
                         <div class="d-flex align-items-center justify-content-center mb-3">
@@ -88,7 +102,7 @@
                 </div>
             </div>
 
-            <div class="col-xl-3 col-md-6 mb-3">
+            <div class="col">
                 <div class="card dashboard-card h-100 border-0 shadow-sm">
                     <div class="card-body text-center">
                         <div class="d-flex align-items-center justify-content-center mb-3">
@@ -103,7 +117,7 @@
                 </div>
             </div>
 
-            <div class="col-xl-3 col-md-6 mb-3">
+            <div class="col">
                 <div class="card dashboard-card h-100 border-0 shadow-sm">
                     <div class="card-body text-center">
                         <div class="d-flex align-items-center justify-content-center mb-3">
@@ -118,7 +132,7 @@
                 </div>
             </div>
 
-            <div class="col-xl-3 col-md-6 mb-3">
+            <div class="col">
                 <div class="card dashboard-card h-100 border-0 shadow-sm">
                     <div class="card-body text-center">
                         <div class="d-flex align-items-center justify-content-center mb-3">
@@ -132,26 +146,8 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Segunda Linha de Cards -->
-        <div class="row mb-4">
-            <div class="col-xl-6 col-md-6 mb-3">
-                <div class="card dashboard-card h-100 border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="d-flex align-items-center justify-content-center mb-3">
-                            <div class="bg-success bg-opacity-10 rounded-circle p-3">
-                                <i class="bi bi-play-circle text-success" style="font-size: 2rem;"></i>
-                            </div>
-                        </div>
-                        <h3 class="card-text text-success" th:text="${alugueisAtivos}">0</h3>
-                        <h6 class="card-title">Aluguéis Ativos</h6>
-                        <small class="text-muted">Aluguéis em andamento</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-xl-6 col-md-6 mb-3">
+            <div class="col">
                 <div class="card dashboard-card h-100 border-0 shadow-sm">
                     <div class="card-body text-center">
                         <div class="d-flex align-items-center justify-content-center mb-3">
@@ -161,46 +157,117 @@
                         </div>
                         <h3 class="card-text text-danger" th:text="${alertasVencimento.totalVencendo}">0</h3>
                         <h6 class="card-title">Vencendo em 3 dias</h6>
-                        <small class="text-muted">Aluguéis que vencem nos próximos 3 dias</small>
+                        <small class="text-muted">Aluguéis próximos do vencimento</small>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Links Rápidos -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header">
-                        <i class="bi bi-lightning"></i>
-                        Ações Rápidas
+        <!-- Linha de Gráficos + Listas -->
+        <div class="row g-3 mb-4">
+            <!-- Gráfico Donut: Status Caçambas -->
+            <div class="col-xl-5">
+                <div class="card border-0 shadow-sm card-compact">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span><i class="bi bi-pie-chart"></i> Status das Caçambas</span>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3 mb-3">
-                                <a th:href="@{/ui/cacambas}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
-                                    <i class="bi bi-box mb-2" style="font-size: 2rem;"></i>
-                                    <span>Gerenciar Caçambas</span>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a th:href="@{/ui/clientes}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
-                                    <i class="bi bi-people mb-2" style="font-size: 2rem;"></i>
-                                    <span>Gerenciar Clientes</span>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a th:href="@{/ui/alugueis}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
-                                    <i class="bi bi-calendar-check mb-2" style="font-size: 2rem;"></i>
-                                    <span>Gerenciar Aluguéis</span>
-                                </a>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <a th:href="@{/ui/alugueis/novo}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
-                                    <i class="bi bi-plus-circle mb-2" style="font-size: 2rem;"></i>
-                                    <span>Novo Aluguel</span>
-                                </a>
-                            </div>
+                        <canvas id="chartCacambas" class="chart-compact"
+                                th:attr="data-total=${totalCacambas}, data-disp=${cacambasDisponiveis}, data-alug=${cacambasAlugadas}"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico Barras: Vencimentos -->
+            <div class="col-xl-7">
+                <div class="card border-0 shadow-sm card-compact">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span><i class="bi bi-bar-chart"></i> Aluguéis Vencendo</span>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartVencimentos" class="chart-compact"
+                                th:attr="data-hoje=${#lists.size(alertasVencimento.vencendoHoje)}, data-amanha=${#lists.size(alertasVencimento.vencendoAmanha)}, data-proximos=${#lists.size(alertasVencimento.vencendoProximosDias)}"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Listas & Ações rápidas -->
+        <div class="row g-3">
+            <div class="col-xl-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span><i class="bi bi-clock-history"></i> Vencendo nos próximos 3 dias</span>
+                        <a th:href="@{/ui/alugueis}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Caçamba</th>
+                                        <th>Data Fim</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <th:block th:if="${alertasVencimento.temAlgumAlerta()}">
+                                        <tr th:each="a : ${alertasVencimento.vencendoHoje}">
+                                            <td th:text="${a.clienteNome}">Cliente</td>
+                                            <td th:text="${a.cacambaCodigo}">C001</td>
+                                            <td th:text="${#temporals.format(a.dataFim, 'dd/MM/yyyy')}">01/01/2024</td>
+                                            <td><span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Vence hoje</span></td>
+                                            <td class="text-end">
+                                                <div class="btn-group">
+                                                    <a th:href="@{/ui/alugueis/{id}(id=${a.id})}" class="btn btn-sm btn-outline-info" title="Ver"><i class="bi bi-eye"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr th:each="a : ${alertasVencimento.vencendoAmanha}">
+                                            <td th:text="${a.clienteNome}">Cliente</td>
+                                            <td th:text="${a.cacambaCodigo}">C001</td>
+                                            <td th:text="${#temporals.format(a.dataFim, 'dd/MM/yyyy')}">01/01/2024</td>
+                                            <td><span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle"></i> Amanhã</span></td>
+                                            <td class="text-end">
+                                                <div class="btn-group">
+                                                    <a th:href="@{/ui/alugueis/{id}(id=${a.id})}" class="btn btn-sm btn-outline-info" title="Ver"><i class="bi bi-eye"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr th:each="a : ${alertasVencimento.vencendoProximosDias}">
+                                            <td th:text="${a.clienteNome}">Cliente</td>
+                                            <td th:text="${a.cacambaCodigo}">C001</td>
+                                            <td th:text="${#temporals.format(a.dataFim, 'dd/MM/yyyy')}">01/01/2024</td>
+                                            <td><span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle"></i> Em breve</span></td>
+                                            <td class="text-end">
+                                                <div class="btn-group">
+                                                    <a th:href="@{/ui/alugueis/{id}(id=${a.id})}" class="btn btn-sm btn-outline-info" title="Ver"><i class="bi bi-eye"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </th:block>
+                                    <tr th:if="${!alertasVencimento.temAlgumAlerta()}">
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                            <p class="mt-2 mb-0">Sem aluguéis próximos do vencimento</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header"><i class="bi bi-lightning"></i> Ações Rápidas</div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/ui/cacambas}" class="btn btn-outline-primary"><i class="bi bi-box me-1"></i>Gerenciar Caçambas</a>
+                            <a th:href="@{/ui/clientes}" class="btn btn-outline-primary"><i class="bi bi-people me-1"></i>Gerenciar Clientes</a>
+                            <a th:href="@{/ui/alugueis}" class="btn btn-outline-primary"><i class="bi bi-calendar-check me-1"></i>Gerenciar Aluguéis</a>
                         </div>
                     </div>
                 </div>
@@ -211,6 +278,74 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script th:src="@{/js/app.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Donut: Status caçambas (usa valores vindos por data-attrs; manutenção = total - disp - alug)
+            try {
+                var chartEl = document.getElementById('chartCacambas');
+                var total = Number(chartEl?.getAttribute('data-total') || 0);
+                var disp = Number(chartEl?.getAttribute('data-disp') || 0);
+                var alug = Number(chartEl?.getAttribute('data-alug') || 0);
+                var manu = Math.max(total - disp - alug, 0);
+                if (chartEl && window.Chart) {
+                    var donut = new Chart(chartEl, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Disponível', 'Alugada', 'Manutenção'],
+                            datasets: [{
+                                data: [disp, alug, manu],
+                                backgroundColor: ['#0c7734', '#e1c233', '#dc3545'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: { boxWidth: 12, boxHeight: 12, padding: 10, font: { size: 11 } }
+                                }
+                            },
+                            cutout: '65%'
+                        }
+                    });
+                    document.addEventListener('cm-theme-changed', function(e) { try { donut.update(); } catch(_){} });
+                }
+            } catch (e) {}
+
+            // Barras: Vencimentos
+            try {
+                var barrasEl = document.getElementById('chartVencimentos');
+                if (barrasEl && window.Chart) {
+                    var hoje = Number(barrasEl.getAttribute('data-hoje') || 0);
+                    var amanha = Number(barrasEl.getAttribute('data-amanha') || 0);
+                    var proximos = Number(barrasEl.getAttribute('data-proximos') || 0);
+                    var barras = new Chart(barrasEl, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Hoje', 'Amanhã', 'Próximos dias'],
+                            datasets: [{
+                                label: 'Quantidade',
+                                data: [hoje, amanha, proximos],
+                                backgroundColor: ['#dc3545', '#e1c233', '#265988'],
+                                borderWidth: 0,
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } } },
+                                x: { ticks: { font: { size: 11 } } }
+                            }
+                        }
+                    });
+                    document.addEventListener('cm-theme-changed', function(e) { try { barras.update(); } catch(_){} });
+                }
+            } catch (e) {}
+        });
+    </script>
 </body>
 </html>
