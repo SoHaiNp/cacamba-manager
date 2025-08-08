@@ -95,6 +95,9 @@ document.addEventListener('DOMContentLoaded', function() {
         button.classList.remove('btn-loading');
         button.disabled = false;
     });
+
+    // (Dark mode removido)
+    bindActiveNavLink();
 });
 
 // Função para mostrar notificações
@@ -200,4 +203,22 @@ function validateField(field) {
     }
     
     return isValid;
+}
+
+// (Funções de tema removidas)
+
+// -------- Ativar link do menu atual ---------
+function bindActiveNavLink() {
+    var navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+    var current = window.location.pathname;
+    navLinks.forEach(function(link) {
+        var href = link.getAttribute('href') || link.getAttribute('th:href');
+        if (!href) return;
+        // Considera caminhos base
+        if (current === '/' && href.endsWith('/ui')) {
+            link.classList.add('active');
+        } else if (current.startsWith(href.replace(/\{.*\}/, ''))) {
+            link.classList.add('active');
+        }
+    });
 }
