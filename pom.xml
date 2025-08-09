@@ -110,6 +110,7 @@
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-postgresql</artifactId>
 		</dependency>
+		<!-- Rate limiting - removido Bucket4j para simplificar (implementação própria de janela fixa) -->
 	</dependencies>
 
 	<build>

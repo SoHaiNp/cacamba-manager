@@ -1,4 +1,8 @@
 package com.eccolimp.cacamba_manager.controller.admin;
+
+import com.eccolimp.cacamba_manager.security.dto.UserRegistrationDto;
+import com.eccolimp.cacamba_manager.security.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,7 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/admin")
+@RequiredArgsConstructor
 public class AdminPageController {
+
+    private final UserService userService;
 
     @GetMapping("/login")
     public String adminLogin(Model model,
@@ -38,7 +45,9 @@ public class AdminPageController {
     }
 
     @GetMapping("/users")
-    public String usersPage() {
+    public String usersPage(Model model) {
+        model.addAttribute("userForm", new UserRegistrationDto());
+        model.addAttribute("usuarios", userService.listarUsuariosAtivos());
         return "admin/users";
     }
 

@@ -1,8 +1,9 @@
 package com.eccolimp.cacamba_manager.security.config;
+
+import com.eccolimp.cacamba_manager.security.service.LoginAttemptService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.eccolimp.cacamba_manager.security.service.LoginAttemptService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,34 +16,28 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @Component
-public class AdminAuthenticationFailureHandler implements AuthenticationFailureHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(AdminAuthenticationFailureHandler.class);
-
+public class UiAuthenticationFailureHandler implements AuthenticationFailureHandler {
+    private static final Logger log = LoggerFactory.getLogger(UiAuthenticationFailureHandler.class);
     private final LoginAttemptService loginAttemptService;
 
-    public AdminAuthenticationFailureHandler(LoginAttemptService loginAttemptService) {
+    public UiAuthenticationFailureHandler(LoginAttemptService loginAttemptService) {
         this.loginAttemptService = loginAttemptService;
     }
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        AuthenticationException exception) throws IOException, ServletException {
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         String loginParam = request.getParameter("login");
         String remoteAddr = request.getRemoteAddr();
         String exSimple = exception.getClass().getSimpleName();
         String exMsg = exception.getMessage();
 
-        // Log básico da falha
-        log.warn("[ADMIN LOGIN FAIL] user='{}' ip='{}' ex='{}' msg='{}'", loginParam, remoteAddr, exSimple, exMsg);
+        log.warn("[UI LOGIN FAIL] user='{}' ip='{}' ex='{}' msg='{}'", loginParam, remoteAddr, exSimple, exMsg);
 
-        // Marca falha para backoff/lockout
         loginAttemptService.onFailure(remoteAddr, loginParam);
 
         String reason = (exception instanceof BadCredentialsException) ? "bad_credentials" : exSimple;
         String encodedMsg = URLEncoder.encode(exMsg != null ? exMsg : reason, StandardCharsets.UTF_8);
-        response.sendRedirect("/admin/login?error=true&reason=" + reason + "&detail=" + encodedMsg);
+        response.sendRedirect("/login?error=true&reason=" + reason + "&detail=" + encodedMsg);
     }
 }
 

@@ -277,7 +277,6 @@ public class AluguelService {
     }
 
     @Transactional(readOnly = true)
-    @Transactional(readOnly = true)
     public boolean cacambaEstaEmUso(Long cacambaId) {
         return !aluguelRepository.findByCacambaIdAndStatusAtivo(cacambaId).isEmpty();
     }

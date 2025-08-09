@@ -131,4 +131,35 @@ public class UserService {
         user.setRole(novaRole);
         userRepository.save(user);
     }
+
+    /**
+     * Exclui usuário. Impede autoexclusão.
+     */
+    public void excluirUsuario(Long userId, Long solicitanteId) {
+        if (userId == null) {
+            throw new BusinessException("ID do usuário é obrigatório");
+        }
+        if (solicitanteId != null && userId.equals(solicitanteId)) {
+            throw new BusinessException("Você não pode excluir seu próprio usuário");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+        userRepository.delete(user);
+    }
+
+    /**
+     * Altera a senha do usuário com validação mínima.
+     */
+    public void alterarSenha(Long userId, String novaSenha, String confirmarSenha) {
+        if (novaSenha == null || novaSenha.length() < 6) {
+            throw new BusinessException("Senha deve ter no mínimo 6 caracteres");
+        }
+        if (!novaSenha.equals(confirmarSenha)) {
+            throw new BusinessException("Senhas não coincidem");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+        user.setPassword(passwordEncoder.encode(novaSenha));
+        userRepository.save(user);
+    }
 }
