@@ -56,7 +56,7 @@
                             <tr>
                                 <th><i class="bi bi-hash"></i> Código</th>
                                 <th><i class="bi bi-arrows-expand"></i> Capacidade (m³)</th>
-                                <th><i class="bi bi-info-circle"></i> Status</th>
+                                <th><i class="bi bi-info-circle"></i> Situação</th>
                                 <th><i class="bi bi-gear"></i> Ações</th>
                             </tr>
                         </thead>
@@ -67,14 +67,11 @@
                                 </td>
                                 <td th:text="${c.capacidadeM3}">6</td>
                                 <td>
-                                    <span th:if="${c.status.name() == 'DISPONIVEL'}" class="badge bg-success">
+                                    <span th:if="${!@aluguelService.cacambaEstaEmUso(c.id)}" class="badge bg-success">
                                         <i class="bi bi-check-circle"></i> Disponível
                                     </span>
-                                    <span th:if="${c.status.name() == 'ALUGADA'}" class="badge bg-warning">
+                                    <span th:if="${@aluguelService.cacambaEstaEmUso(c.id)}" class="badge bg-warning">
                                         <i class="bi bi-calendar-check"></i> Alugada
-                                    </span>
-                                    <span th:if="${c.status.name() == 'MANUTENCAO'}" class="badge bg-danger">
-                                        <i class="bi bi-tools"></i> Manutenção
                                     </span>
                                 </td>
                                 <td>
@@ -86,7 +83,7 @@
                                         </a>
                                         
                                         <!-- Botão de exclusão com confirmação -->
-                                                                                 <button th:if="${c.status.name() != 'ALUGADA'}" 
+                                        <button th:if="${!@aluguelService.cacambaEstaEmUso(c.id)}" 
                                                  type="button" 
                                                  class="btn btn-sm btn-outline-danger" 
                                                  title="Excluir caçamba"
@@ -96,7 +93,7 @@
                                         </button>
                                         
                                         <!-- Tooltip para caçambas alugadas -->
-                                        <span th:if="${c.status.name() == 'ALUGADA'}" 
+                                         <span th:if="${@aluguelService.cacambaEstaEmUso(c.id)}" 
                                               class="btn btn-sm btn-outline-secondary disabled" 
                                               title="Não é possível excluir caçambas alugadas">
                                             <i class="bi bi-trash"></i>

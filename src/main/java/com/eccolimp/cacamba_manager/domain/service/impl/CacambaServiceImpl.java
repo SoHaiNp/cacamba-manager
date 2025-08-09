@@ -1,12 +1,10 @@
 package com.eccolimp.cacamba_manager.domain.service.impl;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -18,14 +16,12 @@ import com.eccolimp.cacamba_manager.domain.service.exception.BusinessException;
 import com.eccolimp.cacamba_manager.dto.CacambaDTO;
 import com.eccolimp.cacamba_manager.mapper.CacambaMapper;
 import com.eccolimp.cacamba_manager.domain.model.Cacamba;
-import com.eccolimp.cacamba_manager.domain.model.Aluguel;
-import com.eccolimp.cacamba_manager.domain.model.StatusAluguel;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
-@Service
+@Service("cacambaService")
 @RequiredArgsConstructor
 @Transactional
 public class CacambaServiceImpl implements CacambaService {
@@ -43,39 +39,29 @@ public class CacambaServiceImpl implements CacambaService {
         }
         var entity = mapper.toEntity(dto);
         entity.setStatus(StatusCacamba.DISPONIVEL);
-        return mapper.toDto(repo.save(entity));
+        var salvo = repo.save(entity);
+        return mapper.toDto(salvo);
     }
 
-    /** Atualizar dados básicos ou status. */
+    /** Atualizar dados básicos. */
     @Override
     public CacambaDTO atualizar(Long id, CacambaDTO dto) {
         var entity = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Caçamba não encontrada"));
-        
-        // Verificar se a caçamba está alugada e tentando alterar o status
-        if (entity.getStatus() == StatusCacamba.ALUGADA && dto.status() != StatusCacamba.ALUGADA) {
-            throw new BusinessException("Não é possível alterar o status de uma caçamba alugada. Finalize ou cancele o aluguel primeiro.");
-        }
-        
         entity.setCodigo(dto.codigo());
         entity.setCapacidadeM3(dto.capacidadeM3());
-        entity.setStatus(dto.status());
         return mapper.toDto(repo.save(entity));
     }
 
     @Override 
     public void deletar(Long id) { 
-        var entity = repo.findById(id)
+        repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Caçamba não encontrada"));
         
-        if (entity.getStatus() == StatusCacamba.ALUGADA) {
-            throw new BusinessException("Não é possível excluir uma caçamba alugada. Finalize ou cancele o aluguel primeiro.");
-        }
-        
-        // Verificar se há aluguéis associados a esta caçamba
-        var alugueis = aluguelRepo.findByCacambaId(id);
-        if (!alugueis.isEmpty()) {
-            throw new BusinessException("Não é possível excluir uma caçamba que possui histórico de aluguéis. Considere alterar o status para 'Manutenção' em vez de excluir.");
+        // Impedir exclusão se houver aluguel ATIVO para esta caçamba
+        var alugueisAtivos = aluguelRepo.findByCacambaIdAndStatusAtivo(id);
+        if (!alugueisAtivos.isEmpty()) {
+            throw new BusinessException("Não é possível excluir uma caçamba que está em uso (aluguel ativo).");
         }
         
         repo.deleteById(id); 
@@ -107,8 +93,6 @@ public class CacambaServiceImpl implements CacambaService {
 
     @Override
     public boolean estaDisponivel(Long id) {
-        return repo.findById(id)
-                   .map(c -> c.getStatus() == StatusCacamba.DISPONIVEL)
-                   .orElse(false);
+        return aluguelRepo.findByCacambaIdAndStatusAtivo(id).isEmpty();
     }
 }

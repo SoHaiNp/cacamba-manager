@@ -63,7 +63,7 @@ public class AluguelPageController {
         model.addAttribute("novoAluguel", new NovoAluguelRequest(null, null, null, LocalDate.now(), 0));
         model.addAttribute("clientes", clienteService.listarTodos());
         model.addAttribute("cacambas", cacambaService.listarTodas().stream()
-                .filter(c -> c.status().name().equals("DISPONIVEL"))
+                .filter(c -> !aluguelService.cacambaEstaEmUso(c.id()))
                 .toList());
         return "aluguel/form";
     }
@@ -96,15 +96,19 @@ public class AluguelPageController {
         return "redirect:/ui/alugueis";
     }
 
-    @PostMapping("/{id}/cancelar")
-    public String cancelar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    // Removido endpoint de cancelar conforme novo fluxo de negócios
+
+    @PostMapping("/{id}/trocar")
+    public String trocar(@PathVariable Long id,
+                         @RequestParam("novaCacambaId") Long novaCacambaId,
+                         RedirectAttributes redirectAttributes) {
         try {
-            aluguelService.cancelar(id);
-            redirectAttributes.addFlashAttribute("mensagem", "Aluguel cancelado com sucesso!");
+            aluguelService.trocarCacamba(id, novaCacambaId);
+            redirectAttributes.addFlashAttribute("mensagem", "Troca de caçamba realizada com sucesso!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("erro", "Erro ao cancelar aluguel: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("erro", e.getMessage());
         }
-        return "redirect:/ui/alugueis";
+        return "redirect:/ui/alugueis/" + id;
     }
 
     @PostMapping("/{id}/renovar")

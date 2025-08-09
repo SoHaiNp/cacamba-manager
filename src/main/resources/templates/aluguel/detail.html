@@ -155,17 +155,17 @@
                         <div class="d-grid gap-2">
                             <button type="button" 
                                     class="btn btn-success" 
-                                                                         title="Finalizar aluguel"
+                                    title="Retirada da caçamba"
                                     data-bs-toggle="modal" 
                                     data-bs-target="#finalizarModal">
-                                <i class="bi bi-check-circle"></i> Finalizar Aluguel
+                                <i class="bi bi-truck"></i> Retirada da Caçamba
                             </button>
                             <button type="button" 
-                                    class="btn btn-danger" 
-                                                                         title="Cancelar aluguel"
+                                    class="btn btn-primary" 
+                                    title="Troca da caçamba"
                                     data-bs-toggle="modal" 
-                                    data-bs-target="#cancelarModal">
-                                <i class="bi bi-x-circle"></i> Cancelar Aluguel
+                                    data-bs-target="#trocaModal">
+                                <i class="bi bi-arrow-left-right"></i> Troca da Caçamba
                             </button>
 
                             <!-- Botão Renovar: aparece quando há dias de atraso ou vence hoje -->
@@ -184,44 +184,52 @@
         </div>
     </div>
 
-    <!-- Modal de confirmação de finalização -->
+    <!-- Modal de confirmação de retirada -->
     <div class="modal fade" id="finalizarModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirmar Finalização</h5>
+                    <h5 class="modal-title">Confirmar Retirada da Caçamba</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Tem certeza que deseja finalizar este aluguel?</p>
+                    <p>Tem certeza que deseja registrar a retirada desta caçamba?</p>
                     <p class="text-muted">A caçamba ficará disponível para novos aluguéis.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <form th:action="@{/ui/alugueis/{id}/finalizar(id=${aluguel.id})}" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-success">Finalizar</button>
+                        <button type="submit" class="btn btn-success">Confirmar Retirada</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal de confirmação de cancelamento -->
-    <div class="modal fade" id="cancelarModal" tabindex="-1">
-        <div class="modal-dialog">
+    <!-- Modal de Troca da Caçamba -->
+    <div class="modal fade" id="trocaModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirmar Cancelamento</h5>
+                    <h5 class="modal-title">Troca da Caçamba</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Tem certeza que deseja cancelar este aluguel?</p>
-                    <p class="text-muted">A caçamba ficará disponível para novos aluguéis.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form th:action="@{/ui/alugueis/{id}/cancelar(id=${aluguel.id})}" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-danger">Cancelar Aluguel</button>
+                    <form th:action="@{/ui/alugueis/{id}/trocar(id=${aluguel.id})}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Selecione uma caçamba disponível</label>
+                            <input type="text" class="form-control mb-2" placeholder="Buscar por código" id="buscaCacambaDetalhe">
+                            <div class="list-group" id="listaDisponiveisDetalhe">
+                                <label class="list-group-item" th:each="c : ${@cacambaService.listarTodas()}" th:if="${!@aluguelService.cacambaEstaEmUso(c.id()) and c.codigo != aluguel.cacambaCodigo}">
+                                    <input class="form-check-input me-1" type="radio" name="novaCacambaId" th:value="${c.id}" required>
+                                    <span th:text="${c.codigo + ' - ' + c.capacidadeM3 + 'm³'}">C001 - 6m³</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            <button type="submit" class="btn btn-primary">Confirmar Troca</button>
+                        </div>
                     </form>
                 </div>
             </div>
