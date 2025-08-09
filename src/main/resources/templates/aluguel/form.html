@@ -73,8 +73,8 @@
                                     title="Selecione uma caçamba disponível"
                                     required>
                                 <option value="">Selecione uma caçamba</option>
-                                <option th:each="cacamba : ${cacambas}" 
-                                        th:value="${cacamba.id}" 
+                                <option th:each="cacamba : ${cacambas}"
+                                        th:value="${cacamba.id}"
                                         th:text="${cacamba.codigo + ' - ' + cacamba.capacidadeM3 + 'm³'}">
                                     C001 - 6m³
                                 </option>

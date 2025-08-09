@@ -17,6 +17,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,6 +31,9 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final AdminAuthenticationFailureHandler adminAuthenticationFailureHandler;
+    private final AdminAuthenticationSuccessHandler adminAuthenticationSuccessHandler;
+    private final UiAuthenticationFailureHandler uiAuthenticationFailureHandler;
+    private final com.eccolimp.cacamba_manager.security.filter.LoginRateLimitingFilter loginRateLimitingFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -87,10 +91,11 @@ public class SecurityConfig {
                 .loginProcessingUrl("/admin/auth/login")
                 .usernameParameter("login")
                 .passwordParameter("password")
-                .defaultSuccessUrl("/admin", true)
+                .successHandler(adminAuthenticationSuccessHandler)
                 .failureHandler(adminAuthenticationFailureHandler)
                 .permitAll()
             )
+            .addFilterBefore(loginRateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
             .logout(logout -> logout
                 .logoutUrl("/admin/logout")
                 .logoutSuccessUrl("/admin/login?logout=true")
@@ -119,7 +124,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 // Recursos públicos
                 .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/login", "/register", "/auth/**").permitAll()
+                .requestMatchers("/login", "/auth/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll() // Para desenvolvimento
                 
                 // Páginas gerenciais - ADMIN ou MANAGER
@@ -137,9 +142,10 @@ public class SecurityConfig {
                 .usernameParameter("login") // Permite login com username ou email
                 .passwordParameter("password")
                 .successHandler(customAuthenticationSuccessHandler)
-                .failureUrl("/login?error=true")
+                .failureHandler(uiAuthenticationFailureHandler)
                 .permitAll()
             )
+            .addFilterBefore(loginRateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout=true")
@@ -164,6 +170,11 @@ public class SecurityConfig {
         );
         http.headers(headers -> headers
             .frameOptions(frame -> frame.sameOrigin()) // Para H2 Console
+            .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000))
+            .contentTypeOptions(withDefaults -> {})
+            .referrerPolicy(ref -> ref.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+            .contentSecurityPolicy(csp -> csp
+                .policyDirectives("default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self'; frame-ancestors 'none';"))
         );
 
         return http.build();

@@ -12,7 +12,6 @@ import com.eccolimp.cacamba_manager.domain.model.Aluguel;
 import com.eccolimp.cacamba_manager.domain.model.Cacamba;
 import com.eccolimp.cacamba_manager.domain.model.Cliente;
 import com.eccolimp.cacamba_manager.domain.model.StatusAluguel;
-import com.eccolimp.cacamba_manager.domain.model.StatusCacamba;
 import com.eccolimp.cacamba_manager.domain.repository.AluguelRepository;
 import com.eccolimp.cacamba_manager.domain.repository.CacambaRepository;
 import com.eccolimp.cacamba_manager.domain.repository.AluguelHistoricoRepository;
@@ -50,10 +49,6 @@ public class AluguelService {
         Cacamba cacamba = cacambaRepository.findById(request.cacambaId())
             .orElseThrow(() -> new BusinessException("Caçamba não encontrada"));
 
-        if (cacamba.getStatus() != StatusCacamba.DISPONIVEL) {
-            throw new BusinessException("Caçamba indisponível");
-        }
-
         // Validar se a caçamba está disponível no período solicitado
         LocalDate dataInicio = request.dataInicio();
         LocalDate dataFim = dataInicio.plusDays(request.dias() - 1); // -1 porque o dia de início conta como primeiro dia
@@ -79,10 +74,7 @@ public class AluguelService {
         aluguel.setDataFim(dataFim);
         aluguel.setStatus(StatusAluguel.ATIVO);
 
-        cacamba.setStatus(StatusCacamba.ALUGADA);
-
         aluguelRepository.save(aluguel);
-        cacambaRepository.save(cacamba);
 
         return aluguelMapper.toDto(aluguel);
     }
@@ -96,10 +88,8 @@ public class AluguelService {
         }
 
         aluguel.setStatus(StatusAluguel.FINALIZADO);
-        aluguel.getCacamba().setStatus(StatusCacamba.DISPONIVEL);
 
         aluguelRepository.save(aluguel);
-        cacambaRepository.save(aluguel.getCacamba());
 
         return aluguelMapper.toDto(aluguel);
     }
@@ -113,10 +103,8 @@ public class AluguelService {
         }
 
         aluguel.setStatus(StatusAluguel.CANCELADO);
-        aluguel.getCacamba().setStatus(StatusCacamba.DISPONIVEL);
 
         aluguelRepository.save(aluguel);
-        cacambaRepository.save(aluguel.getCacamba());
 
         return aluguelMapper.toDto(aluguel);
     }
@@ -189,12 +177,6 @@ public class AluguelService {
 
         aluguel.setDataFim(novaDataFim);
 
-        // Garantir que a caçamba permaneça com status ALUGADA
-        if (aluguel.getCacamba().getStatus() != StatusCacamba.ALUGADA) {
-            aluguel.getCacamba().setStatus(StatusCacamba.ALUGADA);
-            cacambaRepository.save(aluguel.getCacamba());
-        }
-
         aluguelRepository.save(aluguel);
         return aluguelMapper.toDto(aluguel);
     }
@@ -253,14 +235,37 @@ public class AluguelService {
         novo.setDataFim(novaDataFim);
         novo.setStatus(StatusAluguel.ATIVO);
 
-        // Garantir status da caçamba
-        if (novo.getCacamba().getStatus() != StatusCacamba.ALUGADA) {
-            novo.getCacamba().setStatus(StatusCacamba.ALUGADA);
-            cacambaRepository.save(novo.getCacamba());
-        }
-
         Aluguel salvo = aluguelRepository.save(novo);
         return aluguelMapper.toDto(salvo);
+    }
+
+    /**
+     * Troca a caçamba de um aluguel ATIVO por outra caçamba disponível.
+     */
+    public AluguelDTO trocarCacamba(Long aluguelId, Long novaCacambaId) {
+        Aluguel aluguel = aluguelRepository.findById(aluguelId)
+            .orElseThrow(() -> new EntityNotFoundException("Aluguel não encontrado"));
+
+        if (aluguel.getStatus() != StatusAluguel.ATIVO) {
+            throw new BusinessException("Apenas aluguéis ativos permitem troca de caçamba");
+        }
+
+        Cacamba nova = cacambaRepository.findById(novaCacambaId)
+            .orElseThrow(() -> new BusinessException("Caçamba não encontrada"));
+
+        if (aluguel.getCacamba().getId().equals(nova.getId())) {
+            throw new BusinessException("Selecione uma caçamba diferente da atual");
+        }
+
+        // Verificar se a nova caçamba está disponível agora (sem outro aluguel ATIVO)
+        boolean ocupada = !aluguelRepository.findByCacambaIdAndStatusAtivo(nova.getId()).isEmpty();
+        if (ocupada) {
+            throw new BusinessException("A caçamba selecionada ficou indisponível. Lista atualizada. Tente novamente.");
+        }
+
+        aluguel.setCacamba(nova);
+        aluguelRepository.save(aluguel);
+        return aluguelMapper.toDto(aluguel);
     }
 
     @Transactional(readOnly = true)
@@ -269,6 +274,11 @@ public class AluguelService {
                           .stream()
                           .map(aluguelMapper::toDto)
                           .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean cacambaEstaEmUso(Long cacambaId) {
+        return !aluguelRepository.findByCacambaIdAndStatusAtivo(cacambaId).isEmpty();
     }
 
     @Transactional(readOnly = true)

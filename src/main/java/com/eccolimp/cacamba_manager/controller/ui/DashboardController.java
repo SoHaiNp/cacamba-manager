@@ -28,12 +28,11 @@ public class DashboardController {
         var alertasVencimento = aluguelService.buscarAlertasVencimento();
         
         model.addAttribute("totalCacambas", todasCacambas.size());
-        model.addAttribute("cacambasDisponiveis", todasCacambas.stream()
-                .filter(c -> c.status().name().equals("DISPONIVEL"))
-                .count());
-        model.addAttribute("cacambasAlugadas", todasCacambas.stream()
-                .filter(c -> c.status().name().equals("ALUGADA"))
-                .count());
+        long alugadas = todasCacambas.stream()
+                .filter(c -> !cacambaService.estaDisponivel(c.id()))
+                .count();
+        model.addAttribute("cacambasAlugadas", alugadas);
+        model.addAttribute("cacambasDisponiveis", todasCacambas.size() - alugadas);
         model.addAttribute("totalClientes", todosClientes.size());
         model.addAttribute("alugueisAtivos", aluguelService.countAtivos());
         model.addAttribute("alertasVencimento", alertasVencimento);

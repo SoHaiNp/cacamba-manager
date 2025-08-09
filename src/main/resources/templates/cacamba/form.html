@@ -71,15 +71,11 @@
                                    id="codigo" 
                                    th:field="*{codigo}" 
                                    title="Código único para identificar a caçamba"
-                                   required 
-                                   th:readonly="${cacamba.status != null and cacamba.status.name() == 'ALUGADA'}"
-                                   th:class="${cacamba.status != null and cacamba.status.name() == 'ALUGADA' ? 'form-control-plaintext' : 'form-control'}">
+                                    required>
                             <div class="invalid-feedback">
                                 Por favor, informe o código da caçamba.
                             </div>
-                            <div th:if="${cacamba.status != null and cacamba.status.name() == 'ALUGADA'}" class="form-text text-warning">
-                                <i class="bi bi-exclamation-triangle"></i> Não é possível alterar o código de uma caçamba alugada.
-                            </div>
+                            
                         </div>
                         
                         <div class="col-md-6 mb-3">
@@ -100,30 +96,7 @@
                         </div>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="status" class="form-label">
-                                <i class="bi bi-info-circle"></i> Status *
-                            </label>
-                            <select class="form-select" 
-                                    id="status" 
-                                    th:field="*{status}" 
-                                    title="Status atual da caçamba"
-                                    th:disabled="${cacamba.status != null and cacamba.status.name() == 'ALUGADA'}"
-                                    required>
-                                <option value="">Selecione o status</option>
-                                <option value="DISPONIVEL">Disponível</option>
-                                <option value="ALUGADA">Alugada</option>
-                                <option value="MANUTENCAO">Manutenção</option>
-                            </select>
-                            <div class="invalid-feedback">
-                                Por favor, selecione o status da caçamba.
-                            </div>
-                            <div th:if="${cacamba.status != null and cacamba.status.name() == 'ALUGADA'}" class="form-text text-warning">
-                                <i class="bi bi-exclamation-triangle"></i> Não é possível alterar o status de uma caçamba alugada.
-                            </div>
-                        </div>
-                    </div>
+                    
                     
                     <div class="d-flex justify-content-end gap-2">
                         <a th:href="@{/ui/cacambas}" class="btn btn-secondary">

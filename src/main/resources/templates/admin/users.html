@@ -15,32 +15,145 @@
         <a th:href="@{/admin}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar</a>
     </div>
 
-    <div class="alert alert-info">Gestão de usuários será integrada ao `UserService` existente. Nesta etapa, apenas estrutura visual.</div>
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-person-plus"></i> Novo usuário</span>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#userFormCollapse" aria-expanded="true" aria-controls="userFormCollapse">
+                <i class="bi bi-chevron-down"></i> Formulário
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div class="collapse show" id="userFormCollapse">
+                <div class="p-3">
+                    <form th:action="@{/admin/users/create}" method="post" th:object="${userForm}" class="row g-3">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <div class="col-md-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" th:field="*{username}">
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Nome completo</label>
+                            <input type="text" class="form-control" th:field="*{nomeCompleto}">
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('nomeCompleto')}" th:errors="*{nomeCompleto}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" th:field="*{email}">
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Senha</label>
+                            <input type="password" class="form-control" th:field="*{password}">
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Confirmar Senha</label>
+                            <input type="password" class="form-control" th:field="*{confirmPassword}">
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-primary" type="submit"><i class="bi bi-person-plus"></i> Criar</button>
+                        </div>
+                    </form>
+                </div>
+                </div>
+        </div>
+    </div>
 
     <div class="card border-0 shadow-sm">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0">Lista de usuários</h6>
-                <button class="btn btn-primary btn-sm" disabled><i class="bi bi-person-plus"></i> Novo usuário (em breve)</button>
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Lista de usuários</h6>
+                    </div>
+                    <div class="table-responsive small">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Perfil</th>
+                                <th>Status</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="u : ${usuarios}">
+                                <td th:text="${u.username}"></td>
+                                <td th:text="${u.nomeCompleto}"></td>
+                                <td th:text="${u.email}"></td>
+                                <td th:text="${u.role}"></td>
+                                <td>
+                                    <span th:text="${u.enabled} ? 'Ativo' : 'Inativo'" class="badge" th:classappend="${u.enabled} ? 'bg-success' : 'bg-secondary'"></span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <form th:action="@{'/admin/users/' + ${u.id} + '/password'}" method="post" class="d-inline">
+                                            <div class="input-group input-group-sm" style="max-width: 340px;">
+                                                <input type="password" name="novaSenha" class="form-control" placeholder="Nova senha">
+                                                <input type="password" name="confirmarSenha" class="form-control" placeholder="Confirmar">
+                                                <button class="btn btn-outline-primary" type="submit" title="Alterar senha"><i class="bi bi-key"></i></button>
+                                            </div>
+                                        </form>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" title="Editar" data-bs-toggle="modal" th:data-bs-target="'#editUserModal' + ${u.id}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <form th:action="@{'/admin/users/' + ${u.id} + '/delete'}" method="post" class="d-inline" onsubmit="return confirm('Confirma excluir o usuário?');">
+                                            <button class="btn btn-outline-danger btn-sm" type="submit" title="Excluir"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(usuarios)}">
+                                <td colspan="6" class="text-center text-muted py-4">Nenhum usuário</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="table-responsive small">
-                <table class="table table-hover align-middle">
-                    <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Nome</th>
-                        <th>E-mail</th>
-                        <th>Perfil</th>
-                        <th>Status</th>
-                        <th class="text-end">Ações</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td colspan="6" class="text-center text-muted py-4">Em breve</td>
-                    </tr>
-                    </tbody>
-                </table>
+            <!-- Modais de edição por usuário -->
+            <div th:each="u : ${usuarios}">
+                <div class="modal fade" th:id="'editUserModal' + ${u.id}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Editar Usuário</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form th:action="@{'/admin/users/' + ${u.id} + '/password'}" method="post" class="mb-3">
+                                    <h6 class="mb-2">Alterar Senha</h6>
+                                    <div class="input-group">
+                                        <input type="password" name="novaSenha" class="form-control" placeholder="Nova senha">
+                                        <input type="password" name="confirmarSenha" class="form-control" placeholder="Confirmar">
+                                        <button class="btn btn-outline-primary" type="submit"><i class="bi bi-key"></i></button>
+                                    </div>
+                                </form>
+                                <div class="alert alert-secondary p-2">
+                                    <small>Em breve: edição de dados (nome, email, perfil).</small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -282,21 +282,20 @@
     <script th:src="@{/js/app.js}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Donut: Status caçambas (usa valores vindos por data-attrs; manutenção = total - disp - alug)
+            // Donut: Status caçambas (apenas Disponível e Alugada)
             try {
                 var chartEl = document.getElementById('chartCacambas');
                 var total = Number(chartEl?.getAttribute('data-total') || 0);
                 var disp = Number(chartEl?.getAttribute('data-disp') || 0);
                 var alug = Number(chartEl?.getAttribute('data-alug') || 0);
-                var manu = Math.max(total - disp - alug, 0);
                 if (chartEl && window.Chart) {
                     var donut = new Chart(chartEl, {
                         type: 'doughnut',
                         data: {
-                            labels: ['Disponível', 'Alugada', 'Manutenção'],
+                            labels: ['Disponível', 'Alugada'],
                             datasets: [{
-                                data: [disp, alug, manu],
-                                backgroundColor: ['#0c7734', '#e1c233', '#dc3545'],
+                                data: [disp, alug],
+                                backgroundColor: ['#0c7734', '#e1c233'],
                                 borderWidth: 0
                             }]
                         },

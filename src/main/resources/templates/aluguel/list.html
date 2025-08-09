@@ -206,19 +206,19 @@
                                         <button th:if="${a.status.name() == 'ATIVO'}" 
                                                 type="button" 
                                                 class="btn btn-sm btn-outline-success" 
-                                                                                                 title="Finalizar aluguel"
+                                                title="Retirada da caçamba"
                                                 data-bs-toggle="modal" 
                                                 th:data-bs-target="'#finalizarModal' + ${a.id}">
-                                            <i class="bi bi-check-circle"></i>
+                                            <i class="bi bi-truck"></i>
                                         </button>
-                                        
+
                                         <button th:if="${a.status.name() == 'ATIVO'}" 
                                                 type="button" 
-                                                class="btn btn-sm btn-outline-danger" 
-                                                                                                 title="Cancelar aluguel"
+                                                class="btn btn-sm btn-outline-primary" 
+                                                title="Troca da caçamba"
                                                 data-bs-toggle="modal" 
-                                                th:data-bs-target="'#cancelarModal' + ${a.id}">
-                                            <i class="bi bi-x-circle"></i>
+                                                th:data-bs-target="'#trocaModal' + ${a.id}">
+                                            <i class="bi bi-arrow-left-right"></i>
                                         </button>
 
                                         <!-- Ícone de lixeira para itens CANCELADOS ou FINALIZADOS -->
@@ -232,44 +232,53 @@
                                         </button>
                                     </div>
 
-                                    <!-- Modal de confirmação de finalização -->
+                                    <!-- Modal de confirmação de retirada -->
                                     <div class="modal fade" th:id="'finalizarModal' + ${a.id}" tabindex="-1">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title">Confirmar Finalização</h5>
+                                                    <h5 class="modal-title">Confirmar Retirada da Caçamba</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <p>Tem certeza que deseja finalizar o aluguel do cliente <strong th:text="${a.clienteNome}"></strong>?</p>
+                                                    <p>Tem certeza que deseja registrar a retirada da caçamba do cliente <strong th:text="${a.clienteNome}"></strong>?</p>
                                                     <p class="text-muted">A caçamba ficará disponível para novos aluguéis.</p>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                                     <form th:action="@{/ui/alugueis/{id}/finalizar(id=${a.id})}" method="post" style="display: inline;">
-                                                        <button type="submit" class="btn btn-success">Finalizar</button>
+                                                        <button type="submit" class="btn btn-success">Confirmar Retirada</button>
                                                     </form>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Modal de confirmação de cancelamento -->
-                                    <div class="modal fade" th:id="'cancelarModal' + ${a.id}" tabindex="-1">
-                                        <div class="modal-dialog">
+                                    <!-- Modal de Troca da Caçamba -->
+                                    <div class="modal fade" th:id="'trocaModal' + ${a.id}" tabindex="-1">
+                                        <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title">Confirmar Cancelamento</h5>
+                                                    <h5 class="modal-title">Troca da Caçamba</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <p>Tem certeza que deseja cancelar o aluguel do cliente <strong th:text="${a.clienteNome}"></strong>?</p>
-                                                    <p class="text-muted">A caçamba ficará disponível para novos aluguéis.</p>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                    <form th:action="@{/ui/alugueis/{id}/cancelar(id=${a.id})}" method="post" style="display: inline;">
-                                                        <button type="submit" class="btn btn-danger">Cancelar Aluguel</button>
+                                                    <form th:action="@{/ui/alugueis/{id}/trocar(id=${a.id})}" method="post">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Selecione uma caçamba disponível</label>
+                                                            <input type="text" class="form-control mb-2" placeholder="Buscar por código" th:id="'buscaCacamba' + ${a.id}">
+                                                            <div class="list-group" th:id="'listaDisponiveis' + ${a.id}">
+                                                                <label class="list-group-item" th:each="c : ${@aluguelService.listarAtivos()}" th:remove="all"></label>
+                                                                <label class="list-group-item" th:each="c : ${@cacambaService.listarTodas()}" th:if="${!@aluguelService.cacambaEstaEmUso(c.id()) and c.codigo != a.cacambaCodigo}">
+                                                                    <input class="form-check-input me-1" type="radio" name="novaCacambaId" th:value="${c.id}" required>
+                                                                    <span th:text="${c.codigo + ' - ' + c.capacidadeM3 + 'm³'}">C001 - 6m³</span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-end">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                                            <button type="submit" class="btn btn-primary">Confirmar Troca</button>
+                                                        </div>
                                                     </form>
                                                 </div>
                                             </div>
