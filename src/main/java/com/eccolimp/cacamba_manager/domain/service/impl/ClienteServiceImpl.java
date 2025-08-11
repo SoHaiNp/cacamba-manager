@@ -29,21 +29,26 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     public ClienteDTO criar(ClienteDTO dto) {
-        // Verificar se já existe um cliente com o mesmo contato
-        if (repo.existsByContatoIgnoreCase(dto.contato())) {
-            throw new BusinessException("Contato já cadastrado");
+        // Contato pode ser opcional; só valida duplicidade se informado
+        if (dto.contato() != null && !dto.contato().isBlank()) {
+            if (repo.existsByContatoIgnoreCase(dto.contato())) {
+                throw new BusinessException("Contato já cadastrado");
+            }
         }
-        // Verificar e-mail obrigatório e único
-        if (dto.email() == null || dto.email().isBlank()) {
-            throw new BusinessException("Email é obrigatório");
+
+        // Email opcional: se vazio/nulo ou '-', definir como "-" para persistência
+        String emailNormalizado;
+        if (dto.email() == null || dto.email().isBlank() || "-".equals(dto.email().trim())) {
+            emailNormalizado = "-";
+        } else {
+            emailNormalizado = dto.email().trim().toLowerCase();
+            if (repo.existsByEmailIgnoreCase(emailNormalizado)) {
+                throw new BusinessException("Email já cadastrado");
+            }
         }
-        if (repo.existsByEmailIgnoreCase(dto.email())) {
-            throw new BusinessException("Email já cadastrado");
-        }
+
         var entity = mapper.toEntity(dto);
-        if (entity.getEmail() != null) {
-            entity.setEmail(entity.getEmail().trim().toLowerCase());
-        }
+        entity.setEmail(emailNormalizado);
         return mapper.toDto(repo.save(entity));
     }
 
@@ -52,20 +57,30 @@ public class ClienteServiceImpl implements ClienteService {
         var entity = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
         
-        // Verificar se o contato já existe em outro cliente
-        if (!entity.getContato().equalsIgnoreCase(dto.contato()) && 
-            repo.existsByContatoIgnoreCase(dto.contato())) {
-            throw new BusinessException("Contato já cadastrado");
+        // Verificar se o contato já existe em outro cliente (se informado)
+        if (dto.contato() != null && !dto.contato().isBlank()) {
+            boolean contatoMudou = entity.getContato() == null || !entity.getContato().equalsIgnoreCase(dto.contato());
+            if (contatoMudou && repo.existsByContatoIgnoreCase(dto.contato())) {
+                throw new BusinessException("Contato já cadastrado");
+            }
         }
-        // Verificar se o e-mail já existe em outro cliente
-        if (!entity.getEmail().equalsIgnoreCase(dto.email()) &&
-            repo.existsByEmailIgnoreCase(dto.email())) {
-            throw new BusinessException("Email já cadastrado");
+
+        // Normalizar e tratar email vazio como "-"
+        String emailNormalizado = (dto.email() == null || dto.email().isBlank() || "-".equals(dto.email().trim()))
+                ? "-"
+                : dto.email().trim().toLowerCase();
+
+        // Verificar se o e-mail já existe em outro cliente (ignorando se for "-")
+        if (!"-".equals(emailNormalizado)) {
+            boolean emailMudou = entity.getEmail() == null || !entity.getEmail().equalsIgnoreCase(emailNormalizado);
+            if (emailMudou && repo.existsByEmailIgnoreCase(emailNormalizado)) {
+                throw new BusinessException("Email já cadastrado");
+            }
         }
-        
+
         entity.setNome(dto.nome());
         entity.setContato(dto.contato());
-        entity.setEmail(dto.email() == null ? null : dto.email().trim().toLowerCase());
+        entity.setEmail(emailNormalizado);
         return mapper.toDto(repo.save(entity));
     }
 

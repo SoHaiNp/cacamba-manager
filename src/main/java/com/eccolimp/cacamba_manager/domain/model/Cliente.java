@@ -20,7 +20,7 @@ public class Cliente {
     @Column(nullable = false, length = 120)
     private String nome;
 
-    @Column(nullable = false, length = 120)
+    @Column(nullable = true, length = 120)
     private String contato;
 
     @Column(nullable = false, length = 120, unique = true)
