@@ -164,7 +164,7 @@ public class SecurityConfig {
             )
             .authenticationProvider(authenticationProvider());
 
-        // Para desenvolvimento - desabilitar CSRF apenas para H2 Console (UI)
+        // CSRF: proteger a UI; ignorar apenas H2 e, se necessário, endpoints públicos explícitos
         http.csrf(csrf -> csrf
             .ignoringRequestMatchers("/h2-console/**")
         );

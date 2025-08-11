@@ -23,6 +23,9 @@ public class Cliente {
     @Column(nullable = false, length = 120)
     private String contato;
 
+    @Column(nullable = false, length = 120, unique = true)
+    private String email;
+
     public Long getId() {
         return id;
     }
@@ -47,9 +50,17 @@ public class Cliente {
         this.contato = contato;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(id, nome, contato);
+        return Objects.hash(id, nome, contato, email);
     }
 
     @Override
@@ -63,6 +74,7 @@ public class Cliente {
         Cliente other = (Cliente) obj;
         return Objects.equals(id, other.id) &&
                Objects.equals(nome, other.nome) &&
-               Objects.equals(contato, other.contato);
+               Objects.equals(contato, other.contato) &&
+               Objects.equals(email, other.email);
     }
 }

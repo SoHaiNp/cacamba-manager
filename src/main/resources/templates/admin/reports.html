@@ -15,24 +15,27 @@
         <a th:href="@{/admin}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar</a>
     </div>
 
-    <div class="alert alert-info">Campos e filtros preparados. Geração de CSV será implementada depois.</div>
-
-    <form>
+    <form method="get" th:action="@{/admin/reports/alugueis.csv}">
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Relatório de Aluguéis (por cliente)</label>
-                <input type="text" class="form-control" placeholder="Nome do cliente (opcional)">
+                <select name="cliente" class="form-select">
+                    <option value="">Todos os clientes</option>
+                    <option th:each="c : ${clientes}"
+                            th:value="${c.nome}"
+                            th:text="${c.nome}"></option>
+                </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label">Período inicial</label>
-                <input type="date" class="form-control">
+                <input type="date" name="dataInicio" class="form-control">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Período final</label>
-                <input type="date" class="form-control">
+                <input type="date" name="dataFim" class="form-control">
             </div>
             <div class="col-12">
-                <button type="button" class="btn btn-outline-primary" disabled>Baixar CSV (em breve)</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-download"></i> Baixar CSV</button>
             </div>
         </div>
     </form>

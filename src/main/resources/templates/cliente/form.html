@@ -58,7 +58,9 @@
                 </span>
             </div>
             <div class="card-body">
-                <form th:object="${cliente}" th:action="@{/ui/clientes/salvar}" method="post" class="needs-validation" novalidate>
+                <form th:object="${cliente}"
+                      th:action="${cliente.id} != null ? @{'/ui/clientes/' + ${cliente.id}} : @{/ui/clientes/salvar}"
+                      method="post" class="needs-validation" novalidate>
                     <input type="hidden" th:field="*{id}">
                     
                     <div class="row">
@@ -81,14 +83,28 @@
                             <label for="contato" class="form-label">
                                 <i class="bi bi-telephone"></i> Contato *
                             </label>
-                            <input type="text" 
-                                   class="form-control" 
+                            <input type="tel" 
+                                   class="form-control tel-br" 
                                    id="contato" 
                                    th:field="*{contato}" 
-                                   title="Telefone ou e-mail do cliente"
+                                   title="Telefone do cliente"
                                    required>
                             <div class="invalid-feedback">
-                                Por favor, informe o contato do cliente.
+                                Por favor, informe o telefone do cliente.
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">
+                                <i class="bi bi-envelope"></i> Email *
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   th:field="*{email}"
+                                   title="Email do cliente"
+                                   required>
+                            <div class="invalid-feedback">
+                                Por favor, informe um email válido.
                             </div>
                         </div>
                     </div>

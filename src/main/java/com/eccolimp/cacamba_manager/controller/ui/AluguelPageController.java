@@ -60,7 +60,7 @@ public class AluguelPageController {
 
     @GetMapping("/novo")
     public String novo(Model model) {
-        model.addAttribute("novoAluguel", new NovoAluguelRequest(null, null, null, LocalDate.now(), 0));
+        model.addAttribute("novoAluguel", new NovoAluguelRequest(null, null, null, LocalDate.now(), 0, null, null));
         model.addAttribute("clientes", clienteService.listarTodos());
         model.addAttribute("cacambas", cacambaService.listarTodas().stream()
                 .filter(c -> !aluguelService.cacambaEstaEmUso(c.id()))
@@ -116,10 +116,18 @@ public class AluguelPageController {
                           @RequestParam(value = "diasAdicionais", required = false) Integer diasAdicionais,
                           @RequestParam(value = "novaDataInicio", required = false) java.time.LocalDate novaDataInicio,
                           @RequestParam(value = "dias", required = false) Integer dias,
+                          @RequestParam(value = "valorContrato", required = false) java.math.BigDecimal valorContrato,
+                          @RequestParam(value = "valorTroca", required = false) java.math.BigDecimal valorTroca,
                           RedirectAttributes redirectAttributes) {
         try {
             // Se vierem campos de novaDataInicio e dias, cria novo contrato e finaliza o atual
             if (novaDataInicio != null && dias != null) {
+                if (valorContrato != null && valorTroca != null) {
+                    var req = new com.eccolimp.cacamba_manager.dto.RenovacaoRequest(id, novaDataInicio, dias, valorContrato, valorTroca);
+                    var novo = aluguelService.renovarCriandoNovoComValores(req);
+                    redirectAttributes.addFlashAttribute("mensagem", "Contrato renovado! Novo contrato criado com sucesso.");
+                    return "redirect:/ui/alugueis/" + novo.id();
+                }
                 var novo = aluguelService.renovarCriandoNovo(id, novaDataInicio, dias);
                 redirectAttributes.addFlashAttribute("mensagem", "Contrato renovado! Novo contrato criado com sucesso.");
                 return "redirect:/ui/alugueis/" + novo.id();

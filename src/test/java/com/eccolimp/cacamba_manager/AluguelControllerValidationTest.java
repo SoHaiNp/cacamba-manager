@@ -30,7 +30,9 @@ class AluguelControllerValidationTest {
                   "cacambaId": null,
                   "endereco": "",
                   "dataInicio": null,
-                  "dias": 0
+                  "dias": 0,
+                  "valorContrato": -1,
+                  "valorTroca": -1
                 }
                 """;
 
@@ -48,7 +50,9 @@ class AluguelControllerValidationTest {
                   "cacambaId": 1,
                   "endereco": "Rua Teste, 123",
                   "dataInicio": "2024-01-01",
-                  "dias": 11
+                  "dias": 11,
+                  "valorContrato": 100,
+                  "valorTroca": 50
                 }
                 """;
 

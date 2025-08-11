@@ -15,6 +15,7 @@ import com.eccolimp.cacamba_manager.domain.model.Cliente;
 import com.eccolimp.cacamba_manager.domain.repository.ClienteRepository;
 import com.eccolimp.cacamba_manager.dto.ClienteDTO;
 import com.eccolimp.cacamba_manager.mapper.ClienteMapper;
+import com.eccolimp.cacamba_manager.domain.service.ClienteService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,12 +26,12 @@ public class ClienteController {
 
     private final ClienteRepository clienteRepository;
     private final ClienteMapper clienteMapper;
+    private final ClienteService clienteService;
 
     @PostMapping
     public ResponseEntity<ClienteDTO> criar(@RequestBody @Validated ClienteDTO dto) {
-        Cliente cliente = clienteMapper.toEntity(dto);
-        Cliente clienteSalvo = clienteRepository.save(cliente);
-        return ResponseEntity.status(HttpStatus.CREATED).body(clienteMapper.toDto(clienteSalvo));
+        ClienteDTO criado = clienteService.criar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
 
     @GetMapping

@@ -58,7 +58,9 @@
                 </span>
             </div>
             <div class="card-body">
-                <form th:object="${cacamba}" th:action="@{/ui/cacambas/salvar}" method="post" class="needs-validation" novalidate>
+                <form th:object="${cacamba}"
+                      th:action="${cacamba.id} != null ? @{'/ui/cacambas/' + ${cacamba.id}} : @{/ui/cacambas/salvar}"
+                      method="post" class="needs-validation" novalidate>
                     <input type="hidden" th:field="*{id}">
                     
                     <div class="row">

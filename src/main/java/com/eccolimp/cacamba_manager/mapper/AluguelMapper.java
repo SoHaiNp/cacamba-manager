@@ -13,6 +13,7 @@ public interface AluguelMapper {
     @Mapping(target = "clienteId", source = "cliente.id")
     @Mapping(target = "cacambaId", source = "cacamba.id")
     @Mapping(target = "diasAtraso", ignore = true)
+    @Mapping(target = "totalTrocas", expression = "java(entity.getValorTroca() != null && entity.getNumeroTrocas() != null ? entity.getValorTroca().multiply(java.math.BigDecimal.valueOf(entity.getNumeroTrocas())) : java.math.BigDecimal.ZERO)")
     AluguelDTO toDto(Aluguel entity);
     
     @Mapping(target = "cliente", ignore = true)
@@ -25,5 +26,6 @@ public interface AluguelMapper {
     @Mapping(target = "cacambaCapacidade", source = "cacamba.capacidadeM3")
     @Mapping(target = "diasRestantes", ignore = true)
     @Mapping(target = "diasAtraso", ignore = true)
+    @Mapping(target = "totalTrocas", expression = "java(entity.getValorTroca() != null && entity.getNumeroTrocas() != null ? entity.getValorTroca().multiply(java.math.BigDecimal.valueOf(entity.getNumeroTrocas())) : java.math.BigDecimal.ZERO)")
     AluguelDetalhadoDTO toDetalhadoDto(Aluguel entity);
 }

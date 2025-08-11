@@ -1,5 +1,6 @@
 package com.eccolimp.cacamba_manager.domain.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import jakarta.persistence.Column;
@@ -40,6 +41,15 @@ public class Aluguel {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 12)
     private StatusAluguel status = StatusAluguel.ATIVO;
+
+    @Column(name = "valor_contrato", precision = 12, scale = 2, nullable = false)
+    private BigDecimal valorContrato = BigDecimal.ZERO;
+
+    @Column(name = "valor_troca", precision = 12, scale = 2, nullable = false)
+    private BigDecimal valorTroca = BigDecimal.ZERO;
+
+    @Column(name = "numero_trocas", nullable = false)
+    private Integer numeroTrocas = 0;
 
     // Getters e Setters
     public Long getId() {
@@ -96,5 +106,29 @@ public class Aluguel {
 
     public void setStatus(StatusAluguel status) {
         this.status = status;
+    }
+
+    public BigDecimal getValorContrato() {
+        return valorContrato;
+    }
+
+    public void setValorContrato(BigDecimal valorContrato) {
+        this.valorContrato = valorContrato;
+    }
+
+    public BigDecimal getValorTroca() {
+        return valorTroca;
+    }
+
+    public void setValorTroca(BigDecimal valorTroca) {
+        this.valorTroca = valorTroca;
+    }
+
+    public Integer getNumeroTrocas() {
+        return numeroTrocas;
+    }
+
+    public void setNumeroTrocas(Integer numeroTrocas) {
+        this.numeroTrocas = numeroTrocas;
     }
 }

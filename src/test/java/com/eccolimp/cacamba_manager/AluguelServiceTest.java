@@ -37,6 +37,7 @@ public class AluguelServiceTest {
         Cliente cli = new Cliente();
         cli.setNome("Fulano");
         cli.setContato("(11)9999-9999");
+        cli.setEmail("cli1@example.com");
         cli = clienteRepo.save(cli);
         
         Cacamba cac = new Cacamba();
@@ -47,7 +48,7 @@ public class AluguelServiceTest {
 
         LocalDate dataInicio = LocalDate.now();
         AluguelDTO dto = service.registrar(new NovoAluguelRequest(cli.getId(), cac.getId(),
-                                           "Rua X, 123", dataInicio, 3));
+                                           "Rua X, 123", dataInicio, 3, java.math.BigDecimal.valueOf(100.00), java.math.BigDecimal.valueOf(50.00)));
 
         assertThat(dto.dataFim()).isEqualTo(dataInicio.plusDays(2)); // 3 dias = início + (3-1) = início + 2
         assertThat(cacambaRepo.findById(cac.getId()).get().getStatus())
@@ -59,6 +60,7 @@ public class AluguelServiceTest {
         Cliente cli = new Cliente();
         cli.setNome("Fulano");
         cli.setContato("(11)9999-9999");
+        cli.setEmail("cli2@example.com");
         final Cliente clienteSalvo = clienteRepo.save(cli);
         
         Cacamba cac = new Cacamba();
@@ -69,7 +71,7 @@ public class AluguelServiceTest {
 
         assertThatThrownBy(() -> 
             service.registrar(new NovoAluguelRequest(clienteSalvo.getId(), cacambaSalva.getId(), 
-                "Rua X, 123", LocalDate.now(), 3))
+                "Rua X, 123", LocalDate.now(), 3, java.math.BigDecimal.valueOf(100.00), java.math.BigDecimal.valueOf(50.00)))
         ).isInstanceOf(BusinessException.class)
          .hasMessage("Caçamba indisponível");
     }
@@ -79,6 +81,7 @@ public class AluguelServiceTest {
         Cliente cli = new Cliente();
         cli.setNome("Fulano");
         cli.setContato("(11)9999-9999");
+        cli.setEmail("cli3@example.com");
         cli = clienteRepo.save(cli);
         
         Cacamba cac = new Cacamba();
@@ -89,7 +92,7 @@ public class AluguelServiceTest {
 
         LocalDate dataInicio = LocalDate.now().minusDays(5); // Data passada
         AluguelDTO dto = service.registrar(new NovoAluguelRequest(cli.getId(), cac.getId(),
-                                           "Rua X, 123", dataInicio, 3));
+                                           "Rua X, 123", dataInicio, 3, java.math.BigDecimal.valueOf(100.00), java.math.BigDecimal.valueOf(50.00)));
 
         assertThat(dto.dataInicio()).isEqualTo(dataInicio);
         assertThat(dto.dataFim()).isEqualTo(dataInicio.plusDays(2)); // 3 dias = início + (3-1) = início + 2
@@ -100,11 +103,13 @@ public class AluguelServiceTest {
         Cliente cli1 = new Cliente();
         cli1.setNome("Fulano");
         cli1.setContato("(11)9999-9999");
+        cli1.setEmail("cli4@example.com");
         cli1 = clienteRepo.save(cli1);
         
         Cliente cli2 = new Cliente();
         cli2.setNome("Ciclano");
         cli2.setContato("(11)8888-8888");
+        cli2.setEmail("cli5@example.com");
         final Cliente cliente2Salvo = clienteRepo.save(cli2);
         
         Cacamba cac = new Cacamba();
@@ -116,13 +121,13 @@ public class AluguelServiceTest {
         // Primeiro aluguel
         LocalDate dataInicio1 = LocalDate.now();
         service.registrar(new NovoAluguelRequest(cli1.getId(), cac.getId(),
-                           "Rua X, 123", dataInicio1, 5));
+                           "Rua X, 123", dataInicio1, 5, java.math.BigDecimal.valueOf(100.00), java.math.BigDecimal.valueOf(50.00)));
 
         // Tentar segundo aluguel no mesmo período
         LocalDate dataInicio2 = dataInicio1.plusDays(2); // Sobreposição
         assertThatThrownBy(() -> 
             service.registrar(new NovoAluguelRequest(cliente2Salvo.getId(), cacambaSalva.getId(), 
-                "Rua Y, 456", dataInicio2, 3))
+                "Rua Y, 456", dataInicio2, 3, java.math.BigDecimal.valueOf(100.00), java.math.BigDecimal.valueOf(50.00)))
         ).isInstanceOf(BusinessException.class)
          .hasMessage("Caçamba indisponível");
     }
@@ -132,6 +137,7 @@ public class AluguelServiceTest {
         Cliente cli = new Cliente();
         cli.setNome("Fulano");
         cli.setContato("(11)9999-9999");
+        cli.setEmail("cli6@example.com");
         cli = clienteRepo.save(cli);
         
         Cacamba cac = new Cacamba();
@@ -143,7 +149,7 @@ public class AluguelServiceTest {
         // Criar aluguel com data específica: início 07/08, duração 3 dias, fim 09/08
         LocalDate dataInicio = LocalDate.of(2024, 8, 7); // 07/08/2024
         AluguelDTO dto = service.registrar(new NovoAluguelRequest(cli.getId(), cac.getId(),
-                                           "Rua X, 123", dataInicio, 3));
+                                           "Rua X, 123", dataInicio, 3, java.math.BigDecimal.valueOf(100.00), java.math.BigDecimal.valueOf(50.00)));
 
         // Verificar que a data de fim está correta
         assertThat(dto.dataFim()).isEqualTo(LocalDate.of(2024, 8, 9)); // 09/08/2024
@@ -172,6 +178,7 @@ public class AluguelServiceTest {
         Cliente cli = new Cliente();
         cli.setNome("Fulano");
         cli.setContato("(11)9999-9999");
+        cli.setEmail("cli7@example.com");
         cli = clienteRepo.save(cli);
         
         Cacamba cac = new Cacamba();
@@ -183,7 +190,7 @@ public class AluguelServiceTest {
         // Criar aluguel com data específica: início 07/08, duração 3 dias, fim 09/08
         LocalDate dataInicio = LocalDate.of(2024, 8, 7); // 07/08/2024
         AluguelDTO dto = service.registrar(new NovoAluguelRequest(cli.getId(), cac.getId(),
-                                           "Rua X, 123", dataInicio, 3));
+                                           "Rua X, 123", dataInicio, 3, java.math.BigDecimal.valueOf(100.00), java.math.BigDecimal.valueOf(50.00)));
 
         // Verificar que a data de fim está correta
         assertThat(dto.dataFim()).isEqualTo(LocalDate.of(2024, 8, 9)); // 09/08/2024
@@ -207,6 +214,7 @@ public class AluguelServiceTest {
         Cliente cli = new Cliente();
         cli.setNome("Fulano");
         cli.setContato("(11)9999-9999");
+        cli.setEmail("cli8@example.com");
         cli = clienteRepo.save(cli);
         
         Cacamba cac = new Cacamba();
@@ -218,7 +226,7 @@ public class AluguelServiceTest {
         // Criar aluguel vencido: início 01/08, duração 3 dias, fim 03/08
         LocalDate dataInicio = LocalDate.of(2024, 8, 1); // 01/08/2024
         AluguelDTO dto = service.registrar(new NovoAluguelRequest(cli.getId(), cac.getId(),
-                                           "Rua X, 123", dataInicio, 3));
+                                           "Rua X, 123", dataInicio, 3, java.math.BigDecimal.valueOf(100.00), java.math.BigDecimal.valueOf(50.00)));
 
         // Verificar que a data de fim está correta
         assertThat(dto.dataFim()).isEqualTo(LocalDate.of(2024, 8, 3)); // 03/08/2024

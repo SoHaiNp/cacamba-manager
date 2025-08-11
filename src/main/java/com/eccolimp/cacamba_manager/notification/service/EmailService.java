@@ -49,7 +49,7 @@ public class EmailService {
 
         try {
             Cliente cliente = aluguel.getCliente();
-            String to = cliente.getContato(); // Assumindo que o contato é o email
+            String to = cliente.getEmail();
             
             if (!emailValidator.isValid(to)) {
                 log.warn("Email inválido para cliente {}: {}", cliente.getNome(), to);
@@ -78,7 +78,7 @@ public class EmailService {
 
         try {
             Cliente cliente = aluguel.getCliente();
-            String to = cliente.getContato();
+            String to = cliente.getEmail();
             
             if (!emailValidator.isValid(to)) {
                 log.warn("Email inválido para cliente {}: {}", cliente.getNome(), to);

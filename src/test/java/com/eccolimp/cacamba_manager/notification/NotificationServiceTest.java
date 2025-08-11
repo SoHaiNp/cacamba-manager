@@ -108,7 +108,8 @@ class NotificationServiceTest {
     private Aluguel criarAluguel(Long id, String email) {
         Cliente cliente = new Cliente();
         cliente.setNome("Fulano");
-        cliente.setContato(email);
+        cliente.setContato("1199999999");
+        cliente.setEmail(email);
 
         Cacamba cacamba = new Cacamba();
         cacamba.setCodigo("CX-" + id);

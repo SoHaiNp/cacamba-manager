@@ -22,6 +22,7 @@ public class RepositorySmokeTest {
         Cliente c = new Cliente();
         c.setNome("João da Silva");
         c.setContato("11999999999");
+        c.setEmail("joao@example.com");
         clienteRepository.save(c);
         assertThat(clienteRepository.findAll()).hasSize(1);
     }
