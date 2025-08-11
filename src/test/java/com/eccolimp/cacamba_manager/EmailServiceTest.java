@@ -58,7 +58,8 @@ public class EmailServiceTest {
     private Aluguel criarAluguel(String email) {
         Cliente cliente = new Cliente();
         cliente.setNome("Fulano");
-        cliente.setContato(email);
+        cliente.setContato("11 1234-5678");
+        cliente.setEmail(email);
 
         Cacamba cacamba = new Cacamba();
         cacamba.setCodigo("CX-1");

@@ -30,7 +30,7 @@ public class ClientePageController {
 
     @GetMapping("/novo")
     public String novo(Model model) {
-        model.addAttribute("cliente", new ClienteDTO(null, "", ""));
+        model.addAttribute("cliente", new ClienteDTO(null, "", "", ""));
         return "cliente/form";
     }
 

@@ -30,6 +30,12 @@ public class AluguelController {
         return aluguelService.registrar(req);
     }
 
+    // Endpoint para renovar criando novo contrato com possibilidade de novos valores
+    @PostMapping("/renovar")
+    public AluguelDTO renovarCriandoNovo(@RequestBody @Valid com.eccolimp.cacamba_manager.dto.RenovacaoRequest request) {
+        return aluguelService.renovarCriandoNovoComValores(request);
+    }
+
     @GetMapping("/ativos")
     public List<AluguelDTO> ativos() { return aluguelService.listarAtivos(); }
 }

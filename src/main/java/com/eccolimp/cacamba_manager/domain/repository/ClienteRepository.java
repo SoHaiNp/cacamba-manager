@@ -6,4 +6,5 @@ import com.eccolimp.cacamba_manager.domain.model.Cliente;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long>{
     boolean existsByContatoIgnoreCase(String contato);
+    boolean existsByEmailIgnoreCase(String email);
 }

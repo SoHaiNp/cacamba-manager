@@ -1,6 +1,7 @@
 package com.eccolimp.cacamba_manager.dto;
 
 import java.time.LocalDate;
+import java.math.BigDecimal;
 
 import com.eccolimp.cacamba_manager.domain.model.StatusAluguel;
 
@@ -15,5 +16,9 @@ public record AluguelDetalhadoDTO(
     LocalDate dataFim,
     StatusAluguel status,
     Integer diasRestantes,
-    Integer diasAtraso
+    Integer diasAtraso,
+    BigDecimal valorContrato,
+    BigDecimal valorTroca,
+    Integer numeroTrocas,
+    BigDecimal totalTrocas
 ) {} 

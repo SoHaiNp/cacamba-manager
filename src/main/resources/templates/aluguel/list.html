@@ -149,6 +149,7 @@
                                 <th><i class="bi bi-box"></i> Caçamba</th>
                                 <th><i class="bi bi-calendar"></i> Data Início</th>
                                 <th><i class="bi bi-calendar"></i> Data Fim</th>
+                                <th><i class="bi bi-cash-coin"></i> Valor Atual</th>
                                 <th><i class="bi bi-info-circle"></i> Status</th>
                                 <th><i class="bi bi-gear"></i> Ações</th>
                             </tr>
@@ -183,6 +184,9 @@
                                         <i class="bi bi-exclamation-triangle"></i> Vencido há <span th:text="${-a.diasRestantes}">2</span> dias
                                     </span>
                                 </td>
+                                <td>
+                                    <span th:text="${#numbers.formatCurrency((a.valorContrato ?: 0) + (a.totalTrocas ?: 0))}">R$ 0,00</span>
+                                </td>
                                 
                                 <td>
                                     <span th:if="${a.status.name() == 'ATIVO'}" class="badge bg-success">
@@ -212,7 +216,7 @@
                                             <i class="bi bi-truck"></i>
                                         </button>
 
-                                        <button th:if="${a.status.name() == 'ATIVO'}" 
+                                        <button th:if="${a.status.name() == 'ATIVO' and (a.diasRestantes == null or a.diasRestantes >= 0)}" 
                                                 type="button" 
                                                 class="btn btn-sm btn-outline-primary" 
                                                 title="Troca da caçamba"
@@ -220,6 +224,12 @@
                                                 th:data-bs-target="'#trocaModal' + ${a.id}">
                                             <i class="bi bi-arrow-left-right"></i>
                                         </button>
+                                        <!-- Contrato vencido: mostrar botão desabilitado em cinza -->
+                                        <span th:if="${a.status.name() == 'ATIVO' and a.diasRestantes != null and a.diasRestantes < 0}"
+                                              class="btn btn-sm btn-outline-secondary disabled" 
+                                              title="Troca indisponível para contrato vencido">
+                                            <i class="bi bi-arrow-left-right"></i>
+                                        </span>
 
                                         <!-- Ícone de lixeira para itens CANCELADOS ou FINALIZADOS -->
                                         <button th:if="${a.status.name() == 'CANCELADO' or a.status.name() == 'FINALIZADO'}"
@@ -247,6 +257,7 @@
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                                     <form th:action="@{/ui/alugueis/{id}/finalizar(id=${a.id})}" method="post" style="display: inline;">
+                                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                                         <button type="submit" class="btn btn-success">Confirmar Retirada</button>
                                                     </form>
                                                 </div>
@@ -263,7 +274,8 @@
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form th:action="@{/ui/alugueis/{id}/trocar(id=${a.id})}" method="post">
+                                                        <form th:action="@{/ui/alugueis/{id}/trocar(id=${a.id})}" method="post">
+                                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                                         <div class="mb-3">
                                                             <label class="form-label">Selecione uma caçamba disponível</label>
                                                             <input type="text" class="form-control mb-2" placeholder="Buscar por código" th:id="'buscaCacamba' + ${a.id}">

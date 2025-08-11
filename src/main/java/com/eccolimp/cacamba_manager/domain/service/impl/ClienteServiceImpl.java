@@ -33,7 +33,17 @@ public class ClienteServiceImpl implements ClienteService {
         if (repo.existsByContatoIgnoreCase(dto.contato())) {
             throw new BusinessException("Contato já cadastrado");
         }
+        // Verificar e-mail obrigatório e único
+        if (dto.email() == null || dto.email().isBlank()) {
+            throw new BusinessException("Email é obrigatório");
+        }
+        if (repo.existsByEmailIgnoreCase(dto.email())) {
+            throw new BusinessException("Email já cadastrado");
+        }
         var entity = mapper.toEntity(dto);
+        if (entity.getEmail() != null) {
+            entity.setEmail(entity.getEmail().trim().toLowerCase());
+        }
         return mapper.toDto(repo.save(entity));
     }
 
@@ -47,9 +57,15 @@ public class ClienteServiceImpl implements ClienteService {
             repo.existsByContatoIgnoreCase(dto.contato())) {
             throw new BusinessException("Contato já cadastrado");
         }
+        // Verificar se o e-mail já existe em outro cliente
+        if (!entity.getEmail().equalsIgnoreCase(dto.email()) &&
+            repo.existsByEmailIgnoreCase(dto.email())) {
+            throw new BusinessException("Email já cadastrado");
+        }
         
         entity.setNome(dto.nome());
         entity.setContato(dto.contato());
+        entity.setEmail(dto.email() == null ? null : dto.email().trim().toLowerCase());
         return mapper.toDto(repo.save(entity));
     }
 

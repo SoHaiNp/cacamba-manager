@@ -55,6 +55,7 @@
                         <thead>
                             <tr>
                                 <th><i class="bi bi-person"></i> Nome</th>
+                                <th><i class="bi bi-envelope"></i> Email</th>
                                 <th><i class="bi bi-telephone"></i> Contato</th>
                                 <th><i class="bi bi-gear"></i> Ações</th>
                             </tr>
@@ -64,6 +65,7 @@
                                 <td>
                                     <strong th:text="${c.nome}">João Silva</strong>
                                 </td>
+                                <td th:text="${c.email}">cliente@exemplo.com</td>
                                 <td th:text="${c.contato}">(11) 99999-9999</td>
                                 <td>
                                     <div class="btn-group" role="group">

@@ -389,7 +389,19 @@ body {
 
 /* Gráficos compactos */
 .card-compact .card-body { padding: 0.75rem; }
-.chart-compact { height: 240px !important; max-height: 240px; }
+.chart-compact { height: 240px !important; max-height: 240px; width: 100% !important; }
+/* Placeholder para gráficos quando biblioteca não está disponível ou sem dados */
+.chart-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 240px;
+    color: var(--muted-color);
+    font-weight: 600;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
 @media (max-width: 576px) {
   .chart-compact { height: 200px !important; max-height: 200px; }
 }

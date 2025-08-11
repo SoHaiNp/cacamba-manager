@@ -73,6 +73,16 @@ public class AluguelService {
         aluguel.setDataInicio(dataInicio);
         aluguel.setDataFim(dataFim);
         aluguel.setStatus(StatusAluguel.ATIVO);
+        // Validar e definir valores monetários
+        if (request.valorContrato() == null || request.valorContrato().scale() > 2 || request.valorContrato().signum() < 0) {
+            throw new BusinessException("Valor do contrato inválido (>= 0 com 2 casas decimais)");
+        }
+        if (request.valorTroca() == null || request.valorTroca().scale() > 2 || request.valorTroca().signum() < 0) {
+            throw new BusinessException("Valor da troca inválido (>= 0 com 2 casas decimais)");
+        }
+        aluguel.setValorContrato(request.valorContrato());
+        aluguel.setValorTroca(request.valorTroca());
+        aluguel.setNumeroTrocas(0);
 
         aluguelRepository.save(aluguel);
 
@@ -234,9 +244,33 @@ public class AluguelService {
         novo.setDataInicio(novaDataInicio);
         novo.setDataFim(novaDataFim);
         novo.setStatus(StatusAluguel.ATIVO);
+        // Copiar valores financeiros; UI poderá permitir alterar antes do persist
+        novo.setValorContrato(aluguelAtual.getValorContrato());
+        novo.setValorTroca(aluguelAtual.getValorTroca());
+        novo.setNumeroTrocas(0);
 
         Aluguel salvo = aluguelRepository.save(novo);
         return aluguelMapper.toDto(salvo);
+    }
+
+    /**
+     * Renova criando um novo contrato permitindo alterar valorContrato e valorTroca.
+     */
+    public AluguelDTO renovarCriandoNovoComValores(com.eccolimp.cacamba_manager.dto.RenovacaoRequest req) {
+        AluguelDTO dto = renovarCriandoNovo(req.aluguelId(), req.novaDataInicio(), req.dias());
+        // Atualiza valores no novo contrato, caso tenham sido informados
+        Aluguel novo = aluguelRepository.findById(dto.id())
+            .orElseThrow(() -> new EntityNotFoundException("Novo contrato não encontrado"));
+        if (req.valorContrato() == null || req.valorContrato().scale() > 2 || req.valorContrato().signum() < 0) {
+            throw new BusinessException("Valor do contrato inválido (>= 0 com 2 casas decimais)");
+        }
+        if (req.valorTroca() == null || req.valorTroca().scale() > 2 || req.valorTroca().signum() < 0) {
+            throw new BusinessException("Valor da troca inválido (>= 0 com 2 casas decimais)");
+        }
+        novo.setValorContrato(req.valorContrato());
+        novo.setValorTroca(req.valorTroca());
+        aluguelRepository.save(novo);
+        return aluguelMapper.toDto(novo);
     }
 
     /**
@@ -264,6 +298,11 @@ public class AluguelService {
         }
 
         aluguel.setCacamba(nova);
+        // contabilizar troca
+        if (aluguel.getNumeroTrocas() == null) {
+            aluguel.setNumeroTrocas(0);
+        }
+        aluguel.setNumeroTrocas(aluguel.getNumeroTrocas() + 1);
         aluguelRepository.save(aluguel);
         return aluguelMapper.toDto(aluguel);
     }
@@ -317,17 +356,23 @@ public class AluguelService {
 
         // Mapear para detalhado com cálculo de dias
         return pageResult.map(a -> {
-            AluguelDetalhadoDTO dto = aluguelMapper.toDetalhadoDto(a);
+            AluguelDetalhadoDTO base = aluguelMapper.toDetalhadoDto(a);
             LocalDate hoje = LocalDate.now();
             long diasRestantes = hoje.isAfter(a.getDataFim())
                 ? -java.time.temporal.ChronoUnit.DAYS.between(a.getDataFim(), hoje)
                 : java.time.temporal.ChronoUnit.DAYS.between(hoje, a.getDataFim());
+            // Inclusivo: contar o dia atual quando futuro
+            if (diasRestantes > 0) diasRestantes += 1;
             Integer diasAtraso = (a.getStatus() == StatusAluguel.ATIVO && hoje.isAfter(a.getDataFim()))
                 ? (int) java.time.temporal.ChronoUnit.DAYS.between(a.getDataFim(), hoje)
                 : null;
+            java.math.BigDecimal totalTrocas = (a.getValorTroca() != null && a.getNumeroTrocas() != null)
+                ? a.getValorTroca().multiply(java.math.BigDecimal.valueOf(a.getNumeroTrocas()))
+                : java.math.BigDecimal.ZERO;
             return new AluguelDetalhadoDTO(
-                dto.id(), dto.clienteNome(), dto.clienteContato(), dto.cacambaCodigo(), dto.cacambaCapacidade(),
-                dto.endereco(), dto.dataInicio(), dto.dataFim(), dto.status(), (int) diasRestantes, diasAtraso
+                base.id(), base.clienteNome(), base.clienteContato(), base.cacambaCodigo(), base.cacambaCapacidade(),
+                base.endereco(), base.dataInicio(), base.dataFim(), base.status(), (int) diasRestantes, diasAtraso,
+                a.getValorContrato(), a.getValorTroca(), a.getNumeroTrocas(), totalTrocas
             );
         });
     }
@@ -346,7 +391,8 @@ public class AluguelService {
         
         return new AluguelDTO(
             dto.id(), dto.clienteId(), dto.cacambaId(), dto.endereco(),
-            dto.dataInicio(), dto.dataFim(), dto.status(), diasAtraso
+            dto.dataInicio(), dto.dataFim(), dto.status(), diasAtraso,
+            dto.valorContrato(), dto.valorTroca(), dto.numeroTrocas(), dto.totalTrocas()
         );
     }
 
@@ -361,7 +407,7 @@ public class AluguelService {
         Aluguel aluguel = aluguelRepository.findById(id)
                    .orElseThrow(() -> new EntityNotFoundException("Aluguel não encontrado"));
         
-        AluguelDetalhadoDTO dto = aluguelMapper.toDetalhadoDto(aluguel);
+        AluguelDetalhadoDTO base = aluguelMapper.toDetalhadoDto(aluguel);
         
         // Calcular dias restantes: negativo para vencido, 0 para hoje, positivo para futuro
         LocalDate hoje = LocalDate.now();
@@ -370,6 +416,7 @@ public class AluguelService {
             diasRestantes = -java.time.temporal.ChronoUnit.DAYS.between(aluguel.getDataFim(), hoje);
         } else {
             diasRestantes = java.time.temporal.ChronoUnit.DAYS.between(hoje, aluguel.getDataFim());
+            if (diasRestantes > 0) diasRestantes += 1; // Inclusivo
         }
         
         // Calcular dias de atraso
@@ -378,10 +425,14 @@ public class AluguelService {
             diasAtraso = (int) java.time.temporal.ChronoUnit.DAYS.between(aluguel.getDataFim(), hoje);
         }
         
+        java.math.BigDecimal totalTrocas = (aluguel.getValorTroca() != null && aluguel.getNumeroTrocas() != null)
+            ? aluguel.getValorTroca().multiply(java.math.BigDecimal.valueOf(aluguel.getNumeroTrocas()))
+            : java.math.BigDecimal.ZERO;
         return new AluguelDetalhadoDTO(
-            dto.id(), dto.clienteNome(), dto.clienteContato(), dto.cacambaCodigo(), 
-            dto.cacambaCapacidade(), dto.endereco(), dto.dataInicio(), dto.dataFim(), 
-            dto.status(), (int) diasRestantes, diasAtraso
+            base.id(), base.clienteNome(), base.clienteContato(), base.cacambaCodigo(), 
+            base.cacambaCapacidade(), base.endereco(), base.dataInicio(), base.dataFim(), 
+            base.status(), (int) diasRestantes, diasAtraso,
+            aluguel.getValorContrato(), aluguel.getValorTroca(), aluguel.getNumeroTrocas(), totalTrocas
         );
     }
 
@@ -427,6 +478,7 @@ public class AluguelService {
     private AluguelVencendoDTO toAluguelVencendoDTO(Aluguel aluguel) {
         LocalDate hoje = LocalDate.now();
         int diasRestantes = (int) java.time.temporal.ChronoUnit.DAYS.between(hoje, aluguel.getDataFim());
+        if (diasRestantes > 0) diasRestantes += 1; // Inclusivo
         
         String tipoVencimento;
         if (aluguel.getDataFim().equals(hoje)) {
