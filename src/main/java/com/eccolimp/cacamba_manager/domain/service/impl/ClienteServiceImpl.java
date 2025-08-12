@@ -118,4 +118,12 @@ public class ClienteServiceImpl implements ClienteService {
         return repo.findById(id).map(mapper::toDto)
                    .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
     }
+
+    @Override
+    public void definirRecebeNotificacoes(Long id, boolean recebe) {
+        var entity = repo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
+        entity.setRecebeNotificacoes(recebe);
+        repo.save(entity);
+    }
 } 

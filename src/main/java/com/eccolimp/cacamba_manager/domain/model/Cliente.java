@@ -26,6 +26,9 @@ public class Cliente {
     @Column(nullable = false, length = 120, unique = true)
     private String email;
 
+    @Column(name = "recebe_notificacoes", nullable = false)
+    private boolean recebeNotificacoes = true;
+
     public Long getId() {
         return id;
     }
@@ -56,6 +59,14 @@ public class Cliente {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public boolean isRecebeNotificacoes() {
+        return recebeNotificacoes;
+    }
+
+    public void setRecebeNotificacoes(boolean recebeNotificacoes) {
+        this.recebeNotificacoes = recebeNotificacoes;
     }
 
     @Override

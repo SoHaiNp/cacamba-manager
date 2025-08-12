@@ -27,22 +27,23 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+    private final com.eccolimp.cacamba_manager.domain.service.SystemSettingsService systemSettingsService;
     private final EmailValidator emailValidator = EmailValidator.getInstance();
 
     @Value("${app.notification.email.enabled:true}")
-    private boolean emailEnabled;
+    private boolean emailEnabledDefault;
 
     @Value("${app.notification.email.from}")
-    private String fromEmail;
+    private String fromEmailDefault;
 
     @Value("${app.notification.email.from-name}")
-    private String fromName;
+    private String fromNameDefault;
 
     /**
      * Envia notificação de aluguel vencendo
      */
     public void enviarNotificacaoVencimento(Aluguel aluguel, int diasRestantes) {
-        if (!emailEnabled) {
+        if (!isNotificationsEnabled()) {
             log.info("Notificações por email desabilitadas");
             return;
         }
@@ -50,6 +51,10 @@ public class EmailService {
         try {
             Cliente cliente = aluguel.getCliente();
             String to = cliente.getEmail();
+            if (!cliente.isRecebeNotificacoes()) {
+                log.info("Cliente {} desativado para notificações. Pulando envio.", cliente.getNome());
+                return;
+            }
             
             if (!emailValidator.isValid(to)) {
                 log.warn("Email inválido para cliente {}: {}", cliente.getNome(), to);
@@ -71,7 +76,7 @@ public class EmailService {
      * Envia confirmação de novo aluguel
      */
     public void enviarConfirmacaoAluguel(Aluguel aluguel) {
-        if (!emailEnabled) {
+        if (!isNotificationsEnabled()) {
             log.info("Notificações por email desabilitadas");
             return;
         }
@@ -79,6 +84,10 @@ public class EmailService {
         try {
             Cliente cliente = aluguel.getCliente();
             String to = cliente.getEmail();
+            if (!cliente.isRecebeNotificacoes()) {
+                log.info("Cliente {} desativado para notificações. Pulando envio.", cliente.getNome());
+                return;
+            }
             
             if (!emailValidator.isValid(to)) {
                 log.warn("Email inválido para cliente {}: {}", cliente.getNome(), to);
@@ -100,7 +109,7 @@ public class EmailService {
      * Envia relatório semanal de aluguéis ativos
      */
     public void enviarRelatorioSemanal(String to, Map<String, Object> dados) {
-        if (!emailEnabled) {
+        if (!isNotificationsEnabled()) {
             log.info("Notificações por email desabilitadas");
             return;
         }
@@ -117,11 +126,30 @@ public class EmailService {
         }
     }
 
+    /**
+     * Envia relatório semanal ignorando o toggle de notificações (uso: teste manual)
+     */
+    public void enviarRelatorioSemanalForcado(String to, Map<String, Object> dados) {
+        try {
+            String subject = "Relatório Semanal - Aluguéis Ativos";
+            String htmlContent = gerarTemplateRelatorioSemanal(dados);
+
+            enviarEmail(to, subject, htmlContent);
+            log.info("[FORÇADO] Relatório semanal enviado para {}", to);
+
+        } catch (Exception e) {
+            log.error("Erro ao enviar relatório semanal (forçado) para {}", to, e);
+        }
+    }
+
     private void enviarEmail(String to, String subject, String htmlContent) throws MessagingException {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+            var settings = systemSettingsService.getOrCreateDefaults();
+            String fromEmail = (settings.getFromEmail() != null && !settings.getFromEmail().isBlank()) ? settings.getFromEmail() : fromEmailDefault;
+            String fromName = (settings.getFromName() != null && !settings.getFromName().isBlank()) ? settings.getFromName() : fromNameDefault;
             helper.setFrom(fromEmail, fromName);
             helper.setTo(to);
             helper.setSubject(subject);
@@ -131,6 +159,16 @@ public class EmailService {
         } catch (java.io.UnsupportedEncodingException e) {
             log.error("Erro de encoding ao enviar email para {}", to, e);
             throw new MessagingException("Erro de encoding: " + e.getMessage(), e);
+        }
+    }
+
+    private boolean isNotificationsEnabled() {
+        try {
+            var settings = systemSettingsService.getOrCreateDefaults();
+            return settings.isNotificationsEnabled();
+        } catch (Exception e) {
+            // fallback para property
+            return emailEnabledDefault;
         }
     }
 

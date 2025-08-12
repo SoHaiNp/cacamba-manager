@@ -173,6 +173,28 @@ Seu sistema está **bem estruturado** e **funcional**, com uma base sólida. As 
   - `admin/login.html`, `admin/index.html`, `admin/settings.html`, `admin/import.html`, `admin/users.html`, `admin/reports.html`.
   - Mensagens de erro são genéricas. O “motivo técnico” foi removido da UI; o detalhe permanece apenas nos logs do servidor.
 
+### Diagrama (Mermaid) – Configurações de Notificações
+
+```mermaid
+flowchart LR
+  A[admin/settings.html]
+  A -->|POST salvar| B(AdminSettingsController)
+  B --> C[SystemSettingsService]
+  C --> D[(system_settings)]
+  C --> E[NotificationScheduler]
+  E -->|TaskScheduler| F[enviarNotificacoesVencimento]
+  E -->|TaskScheduler| G[enviarRelatorioSemanal]
+  F --> H[NotificationService]
+  G --> H
+  H --> I[EmailService]
+  I --> D
+```
+
+Descrição rápida:
+- A página `admin/settings.html` envia mudanças para `AdminSettingsController`.
+- `SystemSettingsService` persiste em `system_settings` e notifica o `NotificationScheduler` para reagendar.
+- As tarefas executam `NotificationService`, que usa `EmailService`; ambos leem as configurações correntes.
+
 - **Observabilidade de falhas**
   - `AdminAuthenticationFailureHandler`: registra tentativas de login malsucedidas do painel (sem vazar detalhes ao usuário).
 

@@ -7,6 +7,8 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 </head>
 <body>
 <div class="container py-4">
@@ -15,55 +17,193 @@
         <a th:href="@{/admin}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar</a>
     </div>
 
-    <div class="alert alert-info">Campos preparados. Persistência e agendamentos serão implementados em próxima etapa.</div>
-
-    <form>
+    <form th:action="@{/admin/settings}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <div class="row g-3">
-            <div class="col-12">
+            <div class="col-12 d-flex align-items-center gap-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="notificationsEnabled" name="notificationsEnabled" th:checked="${settings.notificationsEnabled}">
+                    <label class="form-check-label" for="notificationsEnabled">Ativar notificações</label>
+                </div>
+                <span class="small text-muted">Quando desligado, nenhum envio automático ocorrerá. O botão "Testar envio" permanece ativo.</span>
+            </div>
+
+            <div class="col-12 mt-2">
                 <h6 class="text-muted">Notificações de Vencimento</h6>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Agendamento (cron)</label>
-                <input type="text" class="form-control" placeholder="Ex: 0 0 8 * * * (todos os dias às 08:00)">
+            <div class="col-md-3">
+                <label class="form-label">Horário diário (HH:mm)</label>
+                <input type="time" class="form-control" name="vencimentoTime" th:value="${settings.vencimentoTime}">
             </div>
             <div class="col-md-6">
-                <label class="form-label">Horário (HH:mm)</label>
-                <input type="time" class="form-control" value="08:00">
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Remetente (email)</label>
-                <input type="email" class="form-control" placeholder="remetente@empresa.com">
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Destinatários (separados por vírgula)</label>
-                <input type="text" class="form-control" placeholder="a@b.com, c@d.com">
+                <label class="form-label">Dias da semana</label>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="mon" name="runMon" th:checked="${settings.runMon}">
+                        <label class="form-check-label" for="mon">Seg</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="tue" name="runTue" th:checked="${settings.runTue}">
+                        <label class="form-check-label" for="tue">Ter</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="wed" name="runWed" th:checked="${settings.runWed}">
+                        <label class="form-check-label" for="wed">Qua</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="thu" name="runThu" th:checked="${settings.runThu}">
+                        <label class="form-check-label" for="thu">Qui</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="fri" name="runFri" th:checked="${settings.runFri}">
+                        <label class="form-check-label" for="fri">Sex</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="sat" name="runSat" th:checked="${settings.runSat}">
+                        <label class="form-check-label" for="sat">Sáb</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="sun" name="runSun" th:checked="${settings.runSun}">
+                        <label class="form-check-label" for="sun">Dom</label>
+                    </div>
+                </div>
             </div>
 
             <div class="col-12 mt-3">
-                <h6 class="text-muted">Relatório Periódico</h6>
+                <h6 class="text-muted">Remetente e Relatórios</h6>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Agendamento (cron)</label>
-                <input type="text" class="form-control" placeholder="Ex: 0 30 7 * * MON (segundas às 07:30)">
+            <div class="col-md-4">
+                <label class="form-label">Remetente (email)</label>
+                <select class="form-select" name="fromEmail" id="fromEmailSelect">
+                    <option value="">Selecione um email do sistema</option>
+                    <option th:each="u : ${usuariosAtivos}"
+                            th:value="${u.email}"
+                            th:text="${u.email}"
+                            th:data-nome="${u.nomeCompleto}"
+                            th:selected="${u.email} == ${settings.fromEmail}"></option>
+                </select>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Horário (HH:mm)</label>
-                <input type="time" class="form-control" value="07:30">
+            <div class="col-md-4">
+                <label class="form-label">Nome do remetente</label>
+                <input type="text" class="form-control" name="fromName" id="fromNameInput" placeholder="Ex.: Gerenciador de Caçambas" th:value="${settings.fromName}">
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label">E-mail do administrador</label>
-                <input type="email" class="form-control" placeholder="admin@empresa.com">
+                <input type="email" class="form-control" name="reportToEmail" th:value="${adminEmail}" readonly>
+                <div class="form-text">Usa o email do ADMIN do sistema e não pode ser editado.</div>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Horário diário de relatório (HH:mm)</label>
+                <input type="time" class="form-control" name="relatorioTime" th:value="${settings.relatorioTime}">
             </div>
         </div>
 
         <div class="mt-4 d-flex gap-2">
-            <button type="button" class="btn btn-primary" disabled>Salvar (em breve)</button>
-            <button type="button" class="btn btn-outline-secondary" disabled>Testar envio (em breve)</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="testarEnvio()">Testar envio</button>
         </div>
     </form>
+
+    <hr class="my-4">
+    <div class="d-flex align-items-center justify-content-between">
+        <h6 class="mb-0 text-muted">Clientes aptos a receber e-mail</h6>
+        <input type="text" class="form-control form-control-sm" placeholder="Filtrar por nome" id="filtroNome" style="max-width: 280px;">
+    </div>
+    <div class="table-responsive mt-2">
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th class="text-center" style="width: 140px;">Receber</th>
+                </tr>
+            </thead>
+            <tbody id="listaClientes">
+                <tr th:each="c,iter : ${clientesComEmail}">
+                    <td th:text="${c.nome}"></td>
+                    <td th:text="${c.email}"></td>
+                    <td class="text-center">
+                        <input class="form-check-input" type="checkbox" name="clienteRecebe" th:data-id="${c.id}" th:checked="${c.recebeNotificacoes}">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="small text-muted" th:text="|Total: ${#lists.size(clientesComEmail)} clientes|"></div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="marcarTodos">Marcar todos</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="desmarcarTodos">Desmarcar todos</button>
+                <button type="button" class="btn btn-sm btn-primary" id="salvarRecebedores">Salvar alterações</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function testarEnvio() {
+  const email = document.querySelector('input[name="reportToEmail"]').value;
+  if (!email) { alert('Informe o e-mail do administrador para testar.'); return; }
+  const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+  const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+  fetch('/api/v1/notifications/test?email=' + encodeURIComponent(email), {
+      method: 'POST',
+      headers: { [header]: token },
+      credentials: 'same-origin'
+  })
+    .then(r => r.text())
+    .then(msg => alert(msg))
+    .catch(() => alert('Falha ao acionar teste. Verifique os logs.'));
+}
+
+document.getElementById('filtroNome').addEventListener('input', function() {
+  const termo = this.value.toLowerCase();
+  document.querySelectorAll('#listaClientes tr').forEach(tr => {
+    const nome = tr.children[0].innerText.toLowerCase();
+    tr.style.display = nome.includes(termo) ? '' : 'none';
+  });
+});
+// Ações em massa
+document.getElementById('marcarTodos').addEventListener('click', () => {
+  document.querySelectorAll('#listaClientes input[type="checkbox"]').forEach(ch => ch.checked = true);
+});
+document.getElementById('desmarcarTodos').addEventListener('click', () => {
+  document.querySelectorAll('#listaClientes input[type="checkbox"]').forEach(ch => ch.checked = false);
+});
+
+// Persistir toggles de recebimento
+document.getElementById('salvarRecebedores').addEventListener('click', () => {
+  const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+  const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+  const payload = Array.from(document.querySelectorAll('#listaClientes input[type="checkbox"]')).map(ch => ({
+    id: Number(ch.getAttribute('data-id')),
+    recebe: ch.checked
+  }));
+  fetch('/admin/settings/clientes/recebedores', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', [header]: token },
+    body: JSON.stringify(payload)
+  }).then(r => {
+    if (!r.ok) throw new Error('Falha ao salvar');
+    return r.text();
+  }).then(() => alert('Preferências de recebimento salvas.'))
+    .catch(() => alert('Erro ao salvar preferências.'));
+});
+
+// Preencher automaticamente o nome do remetente ao escolher um email do sistema
+function syncFromName() {
+  const sel = document.getElementById('fromEmailSelect');
+  const opt = sel ? sel.options[sel.selectedIndex] : null;
+  const nome = opt ? opt.getAttribute('data-nome') : '';
+  const nameInput = document.getElementById('fromNameInput');
+  if (nameInput) {
+    nameInput.value = nome || nameInput.value;
+  }
+}
+document.getElementById('fromEmailSelect').addEventListener('change', syncFromName);
+document.addEventListener('DOMContentLoaded', syncFromName);
+</script>
 </body>
 </html>
 

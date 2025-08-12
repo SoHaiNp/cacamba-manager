@@ -133,6 +133,28 @@ public class UserService {
     }
 
     /**
+     * Atualiza dados básicos do usuário (nome completo e email)
+     */
+    public void atualizarDados(Long userId, String novoNomeCompleto, String novoEmail) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+
+        if (novoEmail == null || novoEmail.isBlank()) {
+            throw new BusinessException("Email é obrigatório");
+        }
+        String emailNorm = novoEmail.trim().toLowerCase();
+        if (!emailNorm.equalsIgnoreCase(user.getEmail()) && userRepository.existsByEmail(emailNorm)) {
+            throw new BusinessException("Email já está em uso");
+        }
+
+        user.setEmail(emailNorm);
+        if (novoNomeCompleto != null && !novoNomeCompleto.isBlank()) {
+            user.setNomeCompleto(novoNomeCompleto.trim());
+        }
+        userRepository.save(user);
+    }
+
+    /**
      * Exclui usuário. Impede autoexclusão.
      */
     public void excluirUsuario(Long userId, Long solicitanteId) {

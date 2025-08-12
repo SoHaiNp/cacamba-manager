@@ -1,7 +1,6 @@
 package com.eccolimp.cacamba_manager.notification.service;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,34 +26,50 @@ public class NotificationService {
     private final AluguelRepository aluguelRepository;
 
     @Value("${app.notification.email.report-to}")
-    private String reportToEmail;
+    private String reportToEmailDefault;
+
+    private final com.eccolimp.cacamba_manager.domain.service.SystemSettingsService systemSettingsService;
 
     /**
      * Envia notificações de vencimento automaticamente
      * Cron e fuso configuráveis por propriedade.
      */
-    @Scheduled(cron = "${app.notification.cron.vencimentos:0 0 8 * * ?}", zone = "${app.notification.cron.zone:America/Sao_Paulo}")
     @Transactional
     public void enviarNotificacoesVencimento() {
         log.info("Iniciando envio de notificações de vencimento...");
+        boolean enabled = true;
+        try { enabled = systemSettingsService.getOrCreateDefaults().isNotificationsEnabled(); } catch (Exception ignored) {}
+        log.info("Notificações habilitadas (toggle): {}", enabled);
         
         try {
             AlertasVencimentoDTO alertas = aluguelService.buscarAlertasVencimento();
             
+            java.util.List<String> recipientsHoje = new java.util.ArrayList<>();
+            java.util.List<String> recipientsAmanha = new java.util.ArrayList<>();
+            java.util.List<String> recipientsProximos = new java.util.ArrayList<>();
+
             // Notificar aluguéis vencendo hoje
             if (alertas.temVencendoHoje()) {
                 for (var aluguelDTO : alertas.vencendoHoje()) {
                     Aluguel aluguel = buscarAluguelCompleto(aluguelDTO.id());
+                    var nome = aluguel.getCliente().getNome();
+                    var email = aluguel.getCliente().getEmail();
                     emailService.enviarNotificacaoVencimento(aluguel, 0);
+                    recipientsHoje.add(nome + " <" + email + ">");
                 }
+                log.info("Vencendo HOJE: {} destinatários -> {}", recipientsHoje.size(), String.join(", ", recipientsHoje));
             }
             
             // Notificar aluguéis vencendo amanhã
             if (alertas.temVencendoAmanha()) {
                 for (var aluguelDTO : alertas.vencendoAmanha()) {
                     Aluguel aluguel = buscarAluguelCompleto(aluguelDTO.id());
+                    var nome = aluguel.getCliente().getNome();
+                    var email = aluguel.getCliente().getEmail();
                     emailService.enviarNotificacaoVencimento(aluguel, 1);
+                    recipientsAmanha.add(nome + " <" + email + ">");
                 }
+                log.info("Vencendo AMANHÃ: {} destinatários -> {}", recipientsAmanha.size(), String.join(", ", recipientsAmanha));
             }
             
             // Notificar aluguéis vencendo nos próximos dias
@@ -62,8 +77,12 @@ public class NotificationService {
                 for (var aluguelDTO : alertas.vencendoProximosDias()) {
                     Aluguel aluguel = buscarAluguelCompleto(aluguelDTO.id());
                     int diasRestantes = aluguelDTO.diasRestantes();
+                    var nome = aluguel.getCliente().getNome();
+                    var email = aluguel.getCliente().getEmail();
                     emailService.enviarNotificacaoVencimento(aluguel, diasRestantes);
+                    recipientsProximos.add(nome + " <" + email + ">");
                 }
+                log.info("Vencendo PRÓXIMOS DIAS: {} destinatários -> {}", recipientsProximos.size(), String.join(", ", recipientsProximos));
             }
             
             log.info("Notificações de vencimento enviadas com sucesso");
@@ -85,7 +104,6 @@ public class NotificationService {
      * Envia relatório semanal de aluguéis ativos
      * Cron e fuso configuráveis por propriedade.
      */
-    @Scheduled(cron = "${app.notification.cron.relatorio:0 0 9 ? * MON}", zone = "${app.notification.cron.zone:America/Sao_Paulo}")
     @Transactional
     public void enviarRelatorioSemanal() {
         log.info("Iniciando envio de relatório semanal...");
@@ -93,13 +111,14 @@ public class NotificationService {
         try {
             // Aqui você pode implementar a lógica para buscar dados do relatório
             // e enviar para um email configurado
-            String emailDestino = reportToEmail;
+            String emailDestino = resolveReportToEmail();
+            log.info("Destino do relatório semanal: {}", emailDestino);
             
             // Dados do relatório (implementar conforme necessário)
             Map<String, Object> dadosRelatorio = gerarDadosRelatorioSemanal();
             
             emailService.enviarRelatorioSemanal(emailDestino, dadosRelatorio);
-            log.info("Relatório semanal enviado com sucesso");
+            log.info("Relatório semanal enviado com sucesso para {}", emailDestino);
             
         } catch (Exception e) {
             log.error("Erro ao enviar relatório semanal", e);
@@ -116,7 +135,8 @@ public class NotificationService {
         try {
             // Criar dados de teste
             Map<String, Object> dadosTeste = gerarDadosRelatorioSemanal();
-            emailService.enviarRelatorioSemanal(emailDestino, dadosTeste);
+            // Envia FORÇADO (teste deve funcionar mesmo com toggle OFF)
+            emailService.enviarRelatorioSemanalForcado(emailDestino, dadosTeste);
             
             log.info("Email de teste enviado com sucesso");
         } catch (Exception e) {
@@ -145,5 +165,15 @@ public class NotificationService {
         dados.put("alugueisVencendo", aluguelService.buscarAlertasVencimento().totalVencendo());
         
         return dados;
+    }
+
+    private String resolveReportToEmail() {
+        try {
+            var settings = systemSettingsService.getOrCreateDefaults();
+            if (settings.getReportToEmail() != null && !settings.getReportToEmail().isBlank()) {
+                return settings.getReportToEmail();
+            }
+        } catch (Exception ignored) {}
+        return reportToEmailDefault;
     }
 } 

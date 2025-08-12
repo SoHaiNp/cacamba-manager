@@ -15,4 +15,6 @@ public interface ClienteService {
     List<ClienteDTO> listarTodos();
     Page<ClienteDTO> listar(int page, int size);
     ClienteDTO buscarPorId(Long id);
+
+    void definirRecebeNotificacoes(Long id, boolean recebe);
 } 

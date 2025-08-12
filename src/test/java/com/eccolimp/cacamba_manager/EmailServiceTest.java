@@ -15,6 +15,8 @@ import com.eccolimp.cacamba_manager.domain.model.Aluguel;
 import com.eccolimp.cacamba_manager.domain.model.Cacamba;
 import com.eccolimp.cacamba_manager.domain.model.Cliente;
 import com.eccolimp.cacamba_manager.notification.service.EmailService;
+import com.eccolimp.cacamba_manager.domain.service.SystemSettingsService;
+import com.eccolimp.cacamba_manager.domain.model.SystemSettings;
 
 import jakarta.mail.internet.MimeMessage;
 
@@ -23,15 +25,23 @@ public class EmailServiceTest {
     private JavaMailSender mailSender;
     private TemplateEngine templateEngine;
     private EmailService emailService;
+    private SystemSettingsService systemSettingsService;
 
     @BeforeEach
     void setUp() {
         mailSender = mock(JavaMailSender.class);
         templateEngine = mock(TemplateEngine.class);
-        emailService = new EmailService(mailSender, templateEngine);
-        ReflectionTestUtils.setField(emailService, "emailEnabled", true);
-        ReflectionTestUtils.setField(emailService, "fromEmail", "no-reply@exemplo.com");
-        ReflectionTestUtils.setField(emailService, "fromName", "Sistema");
+        systemSettingsService = mock(SystemSettingsService.class);
+
+        SystemSettings settings = new SystemSettings();
+        settings.setNotificationsEnabled(true);
+        // Deixa fromEmail/fromName nulos para usar os defaults do properties/teste
+        when(systemSettingsService.getOrCreateDefaults()).thenReturn(settings);
+
+        emailService = new EmailService(mailSender, templateEngine, systemSettingsService);
+        ReflectionTestUtils.setField(emailService, "emailEnabledDefault", true);
+        ReflectionTestUtils.setField(emailService, "fromEmailDefault", "no-reply@exemplo.com");
+        ReflectionTestUtils.setField(emailService, "fromNameDefault", "Sistema");
 
         when(templateEngine.process(anyString(), any(Context.class))).thenReturn("html");
         when(mailSender.createMimeMessage()).thenReturn(new MimeMessage((jakarta.mail.Session) null));

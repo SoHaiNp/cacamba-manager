@@ -97,6 +97,29 @@ public class AdminUsersController {
             return "admin/users";
         }
     }
+
+    @PostMapping("/{id}/update")
+    public String updateUser(@PathVariable("id") Long id,
+                             String nomeCompleto,
+                             String email,
+                             RedirectAttributes redirectAttributes,
+                             Model model) {
+        try {
+            userService.atualizarDados(id, nomeCompleto, email);
+            redirectAttributes.addFlashAttribute("message", "Usuário atualizado com sucesso");
+            return "redirect:/admin/users";
+        } catch (BusinessException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("userForm", new UserRegistrationDto());
+            model.addAttribute("usuarios", userService.listarUsuariosAtivos());
+            return "admin/users";
+        } catch (Exception e) {
+            model.addAttribute("error", "Erro interno ao atualizar usuário");
+            model.addAttribute("userForm", new UserRegistrationDto());
+            model.addAttribute("usuarios", userService.listarUsuariosAtivos());
+            return "admin/users";
+        }
+    }
 }
 
 
