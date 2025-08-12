@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,6 +29,7 @@ public class ReportsController {
     private final AluguelRepository aluguelRepository;
     private final CsvReportService csvReportService;
 
+    @Transactional(readOnly = true)
     @GetMapping("/alugueis.csv")
     public ResponseEntity<byte[]> downloadAlugueisCsv(
         @RequestParam(name = "cliente", required = false) String cliente,

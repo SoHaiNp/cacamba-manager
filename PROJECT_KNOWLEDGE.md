@@ -16,3 +16,12 @@
 Endpoints úteis:
 - Testar envio: POST `/api/v1/notifications/test?email=<destino>`
 
+
+## Relatórios CSV – LazyInitializationException em produção
+
+- Contexto: Em produção, `spring.jpa.open-in-view=false` (ver `application-prod.properties`). O endpoint `/admin/reports/alugueis.csv` gerava CSV acessando `aluguel.cliente` e `aluguel.cacamba` (ambos LAZY) após a sessão fechar, causando `LazyInitializationException`.
+- Sintoma observado no log: `Could not initialize proxy [Cliente#<id>] - no session` em `CsvReportService.gerarCsvAlugueis` ao acessar `cliente.getNome()`.
+- Correção aplicada:
+  - `AluguelRepository`: override de `findAll(Specification<Aluguel>)` com `@EntityGraph(attributePaths = {"cliente", "cacamba"})` para carregar relacionamentos necessários ao CSV.
+  - `ReportsController.downloadAlugueisCsv`: anotado com `@Transactional(readOnly = true)` como defesa adicional.
+- Impacto: CSV funciona em produção mantendo a boa prática de Open-In-View desativado.
