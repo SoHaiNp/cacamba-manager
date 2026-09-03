@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# dump local de codigo, nunca versionar
+src.zip

@@ -93,6 +93,7 @@
                         <label class="form-label">Situação</label>
                         <select class="form-select" name="situacao">
                             <option value="" th:selected="${param.situacao == null}">Todas</option>
+                            <option value="VENCENDO" th:selected="${param.situacao == 'VENCENDO'}">Vencendo</option>
                             <option value="VENCE_HOJE" th:selected="${param.situacao == 'VENCE_HOJE'}">Vence hoje</option>
                             <option value="VENCIDOS" th:selected="${param.situacao == 'VENCIDOS'}">Vencidos</option>
                             <option value="PROXIMOS_7_DIAS" th:selected="${param.situacao == 'PROXIMOS_7_DIAS'}">Próximos 7 dias</option>

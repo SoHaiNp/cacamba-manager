@@ -223,3 +223,180 @@ Descrição rápida:
 - **Desativar `spring.jpa.open-in-view`** em produção para reduzir riscos e consumo no render de views.
 - **Monitoramento**: métricas e contadores de tentativas de login (Micrometer), health checks customizados.
 - **SSO/IdP (opcional)**: suporte a OpenID Connect/OAuth2 com mapeamento de grupos para roles.
+
+---
+
+## 📊 **Diagrama UML - Etapa 1: Ordenação e Filtro "Vencendo"**
+
+```mermaid
+classDiagram
+    class SituacaoVencimento {
+        <<enumeration>>
+        TODOS
+        VENCE_HOJE
+        VENCIDOS
+        PROXIMOS_7_DIAS
+        VENCENDO
+    }
+    
+    class AluguelSpecifications {
+        <<static>>
+        +statusEquals(StatusAluguel)
+        +clienteNomeLike(String)
+        +cacambaCodigoLike(String)
+        +dataFimBetween(LocalDate, LocalDate)
+        +venceHoje()
+        +vencidos()
+        +proximos7Dias()
+        +vencendo()
+        +textoLivre(String)
+    }
+    
+    class AluguelService {
+        +listarFiltrado(FiltroAluguel, int, int) Page~AluguelDetalhadoDTO~
+    }
+    
+    class FiltroAluguel {
+        -StatusAluguel status
+        -String clienteNome
+        -String cacambaCodigo
+        -LocalDate dataInicioDe
+        -LocalDate dataInicioAte
+        -LocalDate dataFimDe
+        -LocalDate dataFimAte
+        -SituacaoVencimento situacao
+        -Boolean comAtraso
+        -String texto
+        +getSituacao() SituacaoVencimento
+        +setSituacao(SituacaoVencimento)
+    }
+    
+    class AluguelRepository {
+        +findAll(Specification~Aluguel~) List~Aluguel~
+    }
+    
+    class AluguelPageController {
+        +list(Model, int, StatusAluguel, String, String, LocalDate, LocalDate, LocalDate, LocalDate, SituacaoVencimento, Boolean, String) String
+    }
+    
+    class DashboardController {
+        +dashboard(Model) String
+    }
+    
+    %% Relacionamentos
+    FiltroAluguel --> SituacaoVencimento : uses
+    AluguelService --> FiltroAluguel : processes
+    AluguelService --> AluguelSpecifications : uses
+    AluguelService --> AluguelRepository : uses
+    AluguelPageController --> AluguelService : uses
+    DashboardController --> AluguelService : uses
+    
+    %% Templates
+    class DashboardTemplate {
+        <<Thymeleaf>>
+        +link "Ver todos" → /ui/alugueis?situacao=VENCENDO
+    }
+    
+    class AluguelListTemplate {
+        <<Thymeleaf>>
+        +filtro situacao com opção "Vencendo"
+        +ordenação padrão: dataFim ASC, cliente.nome ASC
+    }
+    
+    AluguelPageController --> AluguelListTemplate : renders
+    DashboardController --> DashboardTemplate : renders
+```
+
+### **Fluxo da Etapa 1:**
+
+1. **Dashboard**: Usuário clica em "Ver todos" → redireciona para `/ui/alugueis?situacao=VENCENDO`
+2. **Controller**: `AluguelPageController.list()` recebe parâmetro `situacao=VENCENDO`
+3. **Service**: `AluguelService.listarFiltrado()` cria `FiltroAluguel` com `situacao=VENCENDO`
+4. **Specification**: Aplica `AluguelSpecifications.vencendo()` que filtra aluguéis ativos vencendo
+5. **Repository**: Executa query com ordenação padrão: `dataFim ASC, cliente.nome ASC`
+6. **Template**: Renderiza lista ordenada por vencimento (vencidos → hoje → futuros)
+
+### **Ordenação Implementada:**
+- **Primária**: `dataFim ASC` (vencidos aparecem primeiro)
+- **Secundária**: `cliente.nome ASC` (desempate alfabético)
+- **Resultado**: Lista prioriza aluguéis mais urgentes (vencidos) e organiza por cliente
+
+---
+
+## 📊 **Diagrama UML - Etapa 2: Regra D+1 via Entity Listener**
+
+```mermaid
+classDiagram
+    class Aluguel {
+        -Long id
+        -Cliente cliente
+        -Cacamba cacamba
+        -String endereco
+        -LocalDate dataEntrega
+        -LocalDate dataInicio
+        -LocalDate dataFim
+        -StatusAluguel status
+        -BigDecimal valorContrato
+        -BigDecimal valorTroca
+        -Integer numeroTrocas
+        -Integer prazoDias
+        +getDataEntrega() LocalDate
+        +setDataEntrega(LocalDate)
+        +getPrazoDias() Integer
+        +setPrazoDias(Integer)
+        +getDataInicio() LocalDate
+        +setDataInicio(LocalDate)
+        +getDataFim() LocalDate
+        +setDataFim(LocalDate)
+    }
+    
+    class AluguelLifecycle {
+        <<EntityListener>>
+        +applyDmais1(Aluguel) void
+        -resolvePrazoDias(Aluguel) Integer
+        -tryGetter(Aluguel, String) Integer
+    }
+    
+    class JPA {
+        <<Framework>>
+        +@PrePersist
+        +@PreUpdate
+    }
+    
+    %% Relacionamentos
+    Aluguel --> AluguelLifecycle : @EntityListeners
+    AluguelLifecycle --> JPA : @PrePersist/@PreUpdate
+    
+    %% Regra D+1
+    class RegraDmais1 {
+        <<Business Rule>>
+        dataInicio = dataEntrega + 1
+        dataFim = dataInicio + (prazo - 1)
+    }
+    
+    AluguelLifecycle --> RegraDmais1 : applies
+    
+    %% Reflection para prazo
+    class ReflectionResolver {
+        <<Utility>>
+        getPrazoDias()
+        getPrazo()
+        getDias()
+    }
+    
+    AluguelLifecycle --> ReflectionResolver : uses
+```
+
+### **Fluxo da Etapa 2:**
+
+1. **Persistência/Atualização**: JPA chama `AluguelLifecycle.applyDmais1()` automaticamente
+2. **Validação**: Verifica se `dataEntrega` e `prazo` estão preenchidos
+3. **Resolução do Prazo**: Usa reflection para encontrar getter do prazo (`getPrazoDias()`, `getPrazo()`, `getDias()`)
+4. **Aplicação da Regra**: Calcula `dataInicio` e `dataFim` conforme regra D+1
+5. **Atualização**: Define os campos calculados na entidade antes da persistência
+
+### **Regra D+1 Implementada:**
+- **dataInicio**: `dataEntrega + 1` (início no dia seguinte à entrega)
+- **dataFim**: `dataInicio + (prazo - 1)` (fim considerando o prazo em dias)
+- **Automático**: Aplicado via Entity Listener antes de persistir/atualizar
+- **Flexível**: Suporte a diferentes nomes de getters para prazo via reflection

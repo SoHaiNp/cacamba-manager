@@ -77,6 +77,15 @@ public final class AluguelSpecifications {
         );
     }
 
+    public static Specification<Aluguel> vencendo() {
+        LocalDate hoje = LocalDate.now();
+        LocalDate limite = hoje.plusDays(7);
+        return (root, query, cb) -> cb.and(
+            cb.equal(root.get("status"), StatusAluguel.ATIVO),
+            cb.lessThanOrEqualTo(root.get("dataFim"), limite)
+        );
+    }
+
     public static Specification<Aluguel> textoLivre(String texto) {
         return (root, query, cb) -> {
             if (texto == null || texto.isBlank()) return null;

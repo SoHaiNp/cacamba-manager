@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -14,8 +15,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import com.eccolimp.cacamba_manager.domain.AluguelLifecycle;
 
 @Entity
+@EntityListeners(AluguelLifecycle.class)
 @Table(name = "aluguel", indexes = @Index(name = "idx_data_fim", columnList = "data_fim"))
 public class Aluguel {
 
@@ -32,11 +35,16 @@ public class Aluguel {
     @Column(nullable = false, length = 180)
     private String endereco;
 
+    @Column(name = "data_entrega")
+    private LocalDate dataEntrega;
+
     @Column(name = "data_inicio", nullable = false)
     private LocalDate dataInicio;
 
     @Column(name = "data_fim", nullable = false)
     private LocalDate dataFim;
+
+    // Regra D+1 aplicada por AluguelLifecycle (@PrePersist/@PreUpdate)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 12)
@@ -50,6 +58,9 @@ public class Aluguel {
 
     @Column(name = "numero_trocas", nullable = false)
     private Integer numeroTrocas = 0;
+
+    @Column(name = "prazo_dias")
+    private Integer prazoDias;
 
     // Getters e Setters
     public Long getId() {
@@ -82,6 +93,14 @@ public class Aluguel {
 
     public void setEndereco(String endereco) {
         this.endereco = endereco;
+    }
+
+    public LocalDate getDataEntrega() {
+        return dataEntrega;
+    }
+
+    public void setDataEntrega(LocalDate dataEntrega) {
+        this.dataEntrega = dataEntrega;
     }
 
     public LocalDate getDataInicio() {
@@ -130,5 +149,13 @@ public class Aluguel {
 
     public void setNumeroTrocas(Integer numeroTrocas) {
         this.numeroTrocas = numeroTrocas;
+    }
+
+    public Integer getPrazoDias() {
+        return prazoDias;
+    }
+
+    public void setPrazoDias(Integer prazoDias) {
+        this.prazoDias = prazoDias;
     }
 }

@@ -1,5 +1,6 @@
 package com.eccolimp.cacamba_manager.notification;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.eccolimp.cacamba_manager.domain.model.Aluguel;
 import com.eccolimp.cacamba_manager.domain.model.Cacamba;

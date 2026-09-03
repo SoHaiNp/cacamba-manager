@@ -12,6 +12,7 @@ import com.eccolimp.cacamba_manager.domain.model.Aluguel;
 import com.eccolimp.cacamba_manager.domain.model.Cacamba;
 import com.eccolimp.cacamba_manager.domain.model.Cliente;
 import com.eccolimp.cacamba_manager.domain.model.StatusAluguel;
+import com.eccolimp.cacamba_manager.domain.model.StatusCacamba;
 import com.eccolimp.cacamba_manager.domain.repository.AluguelRepository;
 import com.eccolimp.cacamba_manager.domain.repository.CacambaRepository;
 import com.eccolimp.cacamba_manager.domain.repository.AluguelHistoricoRepository;
@@ -49,9 +50,18 @@ public class AluguelService {
         Cacamba cacamba = cacambaRepository.findById(request.cacambaId())
             .orElseThrow(() -> new BusinessException("Caçamba não encontrada"));
 
-        // Validar se a caçamba está disponível no período solicitado
-        LocalDate dataInicio = request.dataInicio();
-        LocalDate dataFim = dataInicio.plusDays(request.dias() - 1); // -1 porque o dia de início conta como primeiro dia
+        // Verificar se a caçamba está disponível
+        if (cacamba.getStatus() != StatusCacamba.DISPONIVEL) {
+            throw new BusinessException("Caçamba não está disponível");
+        }
+
+        // Aplicar regra D+1: dataEntrega = dataInicio - 1, prazoDias = dias
+        LocalDate dataEntrega = request.dataInicio().minusDays(1);
+        Integer prazoDias = request.dias();
+        
+        // Calcular dataInicio e dataFim usando a regra D+1 (para verificação de disponibilidade)
+        LocalDate dataInicio = dataEntrega.plusDays(1);
+        LocalDate dataFim = dataInicio.plusDays(prazoDias - 1);
         
         // Verificar se existe algum aluguel ativo para esta caçamba no período
         boolean caçambaDisponivelNoPeriodo = aluguelRepository
@@ -70,8 +80,9 @@ public class AluguelService {
         aluguel.setCliente(cliente);
         aluguel.setCacamba(cacamba);
         aluguel.setEndereco(request.endereco());
-        aluguel.setDataInicio(dataInicio);
-        aluguel.setDataFim(dataFim);
+        aluguel.setDataEntrega(dataEntrega);  // Data de entrega (D)
+        aluguel.setPrazoDias(prazoDias);      // Prazo em dias
+        // dataInicio e dataFim serão calculados automaticamente pelo AluguelLifecycle (@PrePersist)
         aluguel.setStatus(StatusAluguel.ATIVO);
         // Validar e definir valores monetários
         if (request.valorContrato() == null || request.valorContrato().scale() > 2 || request.valorContrato().signum() < 0) {
@@ -85,6 +96,10 @@ public class AluguelService {
         aluguel.setNumeroTrocas(0);
 
         aluguelRepository.save(aluguel);
+
+        // Atualizar status da caçamba para ALUGADA
+        cacamba.setStatus(StatusCacamba.ALUGADA);
+        cacambaRepository.save(cacamba);
 
         return aluguelMapper.toDto(aluguel);
     }
@@ -328,7 +343,8 @@ public class AluguelService {
 
     @Transactional(readOnly = true)
     public Page<AluguelDetalhadoDTO> listarFiltrado(FiltroAluguel filtro, int page, int size) {
-        var pageable = PageRequest.of(page, size, Sort.by("dataInicio").descending());
+        // Ordenação padrão: dataFim ascendente (vencidos → hoje → futuros) com desempate por nome do cliente
+        var pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("dataFim"), Sort.Order.asc("cliente.nome")));
 
         Specification<Aluguel> spec = (root, query, cb) -> cb.conjunction();
 
@@ -347,6 +363,7 @@ public class AluguelService {
                 case VENCE_HOJE -> spec = spec.and(AluguelSpecifications.venceHoje());
                 case VENCIDOS -> spec = spec.and(AluguelSpecifications.vencidos());
                 case PROXIMOS_7_DIAS -> spec = spec.and(AluguelSpecifications.proximos7Dias());
+                case VENCENDO -> spec = spec.and(AluguelSpecifications.vencendo());
                 default -> {
                 }
             }

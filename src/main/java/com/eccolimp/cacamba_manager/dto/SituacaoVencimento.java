@@ -4,7 +4,8 @@ public enum SituacaoVencimento {
     TODOS,
     VENCE_HOJE,
     VENCIDOS,
-    PROXIMOS_7_DIAS
+    PROXIMOS_7_DIAS,
+    VENCENDO
 }
 
 
